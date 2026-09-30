@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# PyTorch / Deep Learning checkpoints & models
+*.pt
+*.pth
+*.onnx
+*.bin
+
+# Data and large artifacts (optional/recommended)
+data/raw/
+data/processed/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Results outputs (keep folder structure via .gitkeep)
+results/figures/*
+!results/figures/.gitkeep
+results/metrics/*
+!results/metrics/.gitkeep
+results/confusion_matrices/*
+!results/confusion_matrices/.gitkeep
+results/error_analysis/*
+!results/error_analysis/.gitkeep
