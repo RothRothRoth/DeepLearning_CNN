@@ -1,6 +1,6 @@
 """Data preparation, PyTorch datasets, and transform pipelines."""
 
-from src.data.dataset import TrafficSignDataset, get_dataloaders
+from src.data.dataset import TrafficSignDataset, get_dataloaders, resolve_crop_path
 from src.data.prepare_dataset import (
     crop_and_save_dataset,
     load_raw_annotations,
@@ -14,6 +14,7 @@ from src.data.transforms import denormalize, get_eval_transforms, get_train_tran
 __all__ = [
     "TrafficSignDataset",
     "get_dataloaders",
+    "resolve_crop_path",
     "load_raw_annotations",
     "parse_and_filter_records",
     "split_source_images",

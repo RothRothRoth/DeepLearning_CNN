@@ -1,6 +1,6 @@
 """PyTorch Dataset and DataLoader implementations for Cambodian Road Signs."""
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Callable, Dict, Optional, Tuple, Union
 
 import pandas as pd
@@ -22,13 +22,30 @@ from src.data.transforms import get_eval_transforms, get_train_transforms
 from src.seed import seed_worker
 
 
+def resolve_crop_path(processed_root: Union[str, Path], crop_path: str) -> Path:
+    """Resolves a manifest crop_path against the processed-crops root.
+
+    Manifests store portable POSIX paths relative to dataset/processed/, e.g.
+    "train/KM_POST/example.jpg". This joins them onto `processed_root` with
+    pathlib, so the same manifest works on Windows, Linux and Colab.
+    """
+    crop_path = str(crop_path)
+    posix = PurePosixPath(crop_path)
+    if "\\" in crop_path or posix.is_absolute() or ".." in posix.parts or ":" in crop_path:
+        raise ValueError(
+            f"Non-portable crop_path {crop_path!r}: expected a POSIX path relative to "
+            "dataset/processed/, e.g. 'train/KM_POST/example.jpg'."
+        )
+    return Path(processed_root).joinpath(*posix.parts)
+
+
 class TrafficSignDataset(Dataset):
     """Custom PyTorch Dataset for Cambodian Traffic Sign crops."""
 
     def __init__(
         self,
         data_source: Union[pd.DataFrame, str, Path],
-        dataset_root: Optional[Path] = None,
+        processed_root: Optional[Union[str, Path]] = None,
         transform: Optional[Callable] = None,
         return_meta: bool = False,
     ):
@@ -36,7 +53,8 @@ class TrafficSignDataset(Dataset):
 
         Args:
             data_source: pandas DataFrame or path to split CSV manifest.
-            dataset_root: Base path to resolve relative crop paths against.
+            processed_root: dataset/processed/ directory that manifest crop_path
+                values are relative to. Defaults to get_paths().processed_dir.
             transform: PyTorch image transformation callable.
             return_meta: If True, returns additional metadata dict in __getitem__.
         """
@@ -47,8 +65,8 @@ class TrafficSignDataset(Dataset):
         else:
             raise ValueError(f"Unsupported data_source type: {type(data_source)}")
 
-        self.dataset_root = (
-            Path(dataset_root).resolve() if dataset_root else get_paths().dataset_dir
+        self.processed_root = (
+            Path(processed_root).resolve() if processed_root else get_paths().processed_dir
         )
         self.transform = transform
         self.return_meta = return_meta
@@ -62,6 +80,12 @@ class TrafficSignDataset(Dataset):
             if cls_name not in self.class_to_idx:
                 raise ValueError(f"Unrecognized class '{cls_name}' found in dataset manifest.")
 
+        # Validate every crop path up front so non-portable manifests fail early.
+        if "crop_path" not in self.df.columns:
+            raise KeyError("Dataset manifest has no 'crop_path' column.")
+        for crop_path in self.df["crop_path"]:
+            resolve_crop_path(self.processed_root, crop_path)
+
     def __len__(self) -> int:
         return len(self.df)
 
@@ -70,23 +94,9 @@ class TrafficSignDataset(Dataset):
     ) -> Union[Tuple[torch.Tensor, int], Tuple[torch.Tensor, int, Dict]]:
         row = self.df.iloc[index]
 
-        # Resolve image path
-        if "absolute_crop_path" in row and Path(str(row["absolute_crop_path"])).exists():
-            img_path = Path(str(row["absolute_crop_path"]))
-        elif "crop_path" in row:
-            img_path = self.dataset_root / row["crop_path"]
-        elif "filepath" in row:
-            img_path = Path(str(row["filepath"]))
-        else:
-            raise KeyError(f"No valid image path column in row: {row.to_dict()}")
-
-        if not img_path.exists():
-            # Fallback relative to project root
-            alt_path = self.dataset_root.parent / row.get("crop_path", "")
-            if alt_path.exists():
-                img_path = alt_path
-            else:
-                raise FileNotFoundError(f"Cropped image not found at: {img_path}")
+        img_path = resolve_crop_path(self.processed_root, row["crop_path"])
+        if not img_path.is_file():
+            raise FileNotFoundError(f"Cropped image not found at: {img_path}")
 
         # Open image as 3-channel RGB
         image = Image.open(img_path).convert("RGB")
@@ -143,17 +153,17 @@ def get_dataloaders(
     # Datasets
     train_dataset = TrafficSignDataset(
         data_source=train_csv,
-        dataset_root=paths.dataset_dir,
+        processed_root=paths.processed_dir,
         transform=get_train_transforms(),
     )
     val_dataset = TrafficSignDataset(
         data_source=val_csv,
-        dataset_root=paths.dataset_dir,
+        processed_root=paths.processed_dir,
         transform=get_eval_transforms(),
     )
     test_dataset = TrafficSignDataset(
         data_source=test_csv,
-        dataset_root=paths.dataset_dir,
+        processed_root=paths.processed_dir,
         transform=get_eval_transforms(),
     )
 

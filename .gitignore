@@ -45,3 +45,8 @@ results/confusion_matrices/*
 !results/confusion_matrices/.gitkeep
 results/error_analysis/*
 !results/error_analysis/.gitkeep
+
+# Experiment run outputs written by the training notebooks
+# (checkpoints, figures, metrics JSON/CSV, predictions)
+results/runs/
+results/checkpoints/

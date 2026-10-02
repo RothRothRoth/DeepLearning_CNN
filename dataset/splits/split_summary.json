@@ -12,5 +12,6 @@
   "exact_26_classes": true,
   "undefined_absent": true,
   "no_splits_class": true,
-  "path_separation_ok": true
+  "path_separation_ok": true,
+  "portable_paths": true
 }

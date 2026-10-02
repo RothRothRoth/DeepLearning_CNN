@@ -182,6 +182,10 @@ def crop_and_save_dataset(
     Layout:
       dataset/processed/<split>/<class_name>/<crop_id>.jpg
       dataset/splits/train.csv, val.csv, test.csv, train.txt, val.txt, test.txt
+
+    Manifest crop_path values are portable POSIX paths relative to
+    `processed_dir` (e.g. "train/KM_POST/<crop_id>.jpg"), with no
+    machine-specific absolute paths, so manifests work on any OS.
     """
     splits_dir.mkdir(parents=True, exist_ok=True)
     processed_dir.mkdir(parents=True, exist_ok=True)
@@ -232,8 +236,7 @@ def crop_and_save_dataset(
 
         processed_records.append(
             {
-                "crop_path": str(crop_path.relative_to(processed_dir.parent)),
-                "absolute_crop_path": str(crop_path.resolve()),
+                "crop_path": crop_path.relative_to(processed_dir).as_posix(),
                 "crop_filename": crop_name,
                 "parent_filename": parent_fn,
                 "split": split,
@@ -251,10 +254,10 @@ def crop_and_save_dataset(
     # Save manifests per split
     for split_name in ["train", "val", "test"]:
         split_df = all_df[all_df["split"] == split_name].reset_index(drop=True)
-        split_df.to_csv(splits_dir / f"{split_name}.csv", index=False)
+        split_df.to_csv(splits_dir / f"{split_name}.csv", index=False, lineterminator="\n")
 
         # Also save simple line-by-line path list
-        with open(splits_dir / f"{split_name}.txt", "w", encoding="utf-8") as f:
+        with open(splits_dir / f"{split_name}.txt", "w", encoding="utf-8", newline="\n") as f:
             for path_str in split_df["crop_path"]:
                 f.write(f"{path_str}\n")
 
@@ -273,6 +276,7 @@ def validate_dataset_integrity(
     3. UNDEFINED is absent.
     4. No accidental 'splits' class directory exists in class hierarchy.
     5. Train, val, and test splits are cleanly separated.
+    6. Manifest crop paths are portable (relative POSIX, no absolute paths).
     """
     train_csv = splits_dir / "train.csv"
     val_csv = splits_dir / "val.csv"
@@ -311,17 +315,18 @@ def validate_dataset_integrity(
     # Check 4: No 'splits' directory treated as class
     no_splits_class = "splits" not in all_classes and "SPLITS" not in all_classes
 
-    # Check 5: Separation of paths
-    train_paths_ok = all(
-        p.replace("\\", "/").startswith("processed/train/")
-        for p in train_df["crop_path"]
-    )
-    val_paths_ok = all(
-        p.replace("\\", "/").startswith("processed/val/") for p in val_df["crop_path"]
-    )
-    test_paths_ok = all(
-        p.replace("\\", "/").startswith("processed/test/") for p in test_df["crop_path"]
-    )
+    # Check 5: Separation of paths (crop_path is relative to processed_dir)
+    train_paths_ok = all(p.startswith("train/") for p in train_df["crop_path"])
+    val_paths_ok = all(p.startswith("val/") for p in val_df["crop_path"])
+    test_paths_ok = all(p.startswith("test/") for p in test_df["crop_path"])
+
+    # Check 6: Portable manifests (no backslashes, drive letters, absolute paths)
+    all_dfs = (train_df, val_df, test_df)
+    portable_paths = all(
+        "\\" not in p and ":" not in p and not p.startswith("/")
+        for df in all_dfs
+        for p in df["crop_path"]
+    ) and not any("absolute_crop_path" in df.columns for df in all_dfs)
 
     report = {
         "source_images_train": len(train_parents),
@@ -340,11 +345,13 @@ def validate_dataset_integrity(
         "undefined_absent": undefined_absent,
         "no_splits_class": no_splits_class,
         "path_separation_ok": train_paths_ok and val_paths_ok and test_paths_ok,
+        "portable_paths": portable_paths,
     }
 
     # Save summary metadata
-    with open(splits_dir / "split_summary.json", "w", encoding="utf-8") as f:
+    with open(splits_dir / "split_summary.json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(report, f, indent=2)
+        f.write("\n")
 
     return report
 
