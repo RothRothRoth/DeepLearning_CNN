@@ -1,0 +1,16 @@
+{
+  "source_images_train": 1766,
+  "source_images_val": 378,
+  "source_images_test": 379,
+  "source_images_total": 2523,
+  "crops_train": 2153,
+  "crops_val": 454,
+  "crops_test": 463,
+  "crops_total": 3070,
+  "class_count": 26,
+  "zero_parent_overlap": true,
+  "exact_26_classes": true,
+  "undefined_absent": true,
+  "no_splits_class": true,
+  "path_separation_ok": true
+}
