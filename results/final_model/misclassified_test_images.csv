@@ -1,0 +1,7 @@
+crop_path,parent_image,true_label,predicted_label,confidence,original_annotation,crop_size_px,smaller_than_pct_of_test_crops,category,visual_observation
+test/LEFT_BEND/NR2_3_crop01_12.jpg,NR2_3.jpg,LEFT_BEND,RIGHT_BEND,0.999637,LEFT BEND,89x87,78,probable annotation error,Yellow diamond sign whose arrow curves to the right.
+test/KM_POST/GX010281.MP4_snapshot_31.36.404_crop00_11.jpg,GX010281.MP4_snapshot_31.36.404.JPG,KM_POST,KEEP_RIGHT,0.999207,KM POST,59x63,91,probable annotation error,Blue round sign with a white arrow pointing down-right; not a kilometre post.
+test/PEDESTRAIN_CROSSING/NR1_68_crop00_17.jpg,NR1_68.jpg,PEDESTRAIN_CROSSING,CHILDREN_CROSSING,0.959636,PEDESTRAIN CROSSING,178x157,26,probable annotation error,Diamond sign showing two figures (an adult and a child) walking together.
+test/PRIORITY_ROAD/NR5_79_crop00_19.jpg,NR5_79.jpg,PRIORITY_ROAD,CROSS_ROAD,0.84017,PRIORITY ROAD,149x131,42,model error,Clear sign; crossing-road symbol (thick vertical bar crossed by a horizontal bar).
+test/NO_ENTRY/NR5_79_crop01_13.jpg,NR5_79.jpg,NO_ENTRY,SLOW_DOWN,0.321022,NO ENTRY,39x39,98,model error,"Very small, blurry red circular sign (39x39 px)."
+test/PRIORITY_ROAD/NR2_38_crop00_19.jpg,NR2_38.jpg,PRIORITY_ROAD,KM_POST,0.253845,PRIORITY ROAD,95x106,72,model error,Sign largely covered by tree branches and leaves.
