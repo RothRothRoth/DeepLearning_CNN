@@ -104,7 +104,16 @@ Notebook: `notebooks/05_hyperparameter_tuning.ipynb`. Tuning was applied to the 
 - Every configuration was trained on the training set and compared **only on validation accuracy**. Ties were broken by validation loss, using a rule fixed before the runs.
 - **The test set was not used during tuning.** It was evaluated once, for the selected configuration only, after the selection was made.
 
-**Selected configuration: Config B** (learning rate 0.001, weight decay 0.001), with a best validation accuracy of **99.78%**. Compared with the baseline settings, stronger weight decay (more regularisation) gave the selected model.
+**Validation results** (from [`tuning_results.csv`](results/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/metrics/tuning_results.csv)):
+
+| Config | Learning rate | Weight decay | Best validation accuracy | Validation loss at best epoch | Best epoch | Training time |
+|---|---:|---:|---:|---:|---:|---:|
+| A | 1e-3 | 1e-4 | 99.78% (453/454) | 0.0290 | 8 | 3.9 min |
+| **B** | **1e-3** | **1e-3** | **99.78% (453/454)** | **0.0280** | **14** | **5.5 min** |
+| C | 1e-4 | 1e-4 | 99.78% (453/454) | 0.0330 | 3 | 2.9 min |
+| D | 1e-4 | 1e-3 | 99.78% (453/454) | 0.0324 | 3 | 3.0 min |
+
+**All four configurations tied at 99.78% validation accuracy (453 of 454 validation crops correct).** Validation accuracy therefore could not separate them. **Config B** (learning rate 0.001, weight decay 0.001) was selected by the pre-defined tie-break rule: it had the lowest validation loss at its best epoch (0.02796). Config B did **not** reach a higher validation accuracy than the other configurations. The tuning study mainly shows that all four settings performed equally well on the validation set.
 
 ## 7. Final Results
 
@@ -115,7 +124,9 @@ All numbers are on the same held-out test set of **463 crops**, which was never 
 | 1. Small CNN from scratch | 70.19% | 50.78% | 133,178 | 8.1 min |
 | 2. ResNet-18, frozen backbone | 92.44% | 88.37% | 13,338 | 5.5 min |
 | 3. ResNet-18, fully fine-tuned (**untuned baseline**, lr 1e-3, wd 1e-4) | 98.06% | 96.80% | 11,189,850 | 4.0 min |
-| **3. ResNet-18, fully fine-tuned + tuned (FINAL MODEL, lr 1e-3, wd 1e-3)** | **98.70%** | **98.47%** | **11,189,850** | — |
+| **3. ResNet-18, fully fine-tuned + tuned (FINAL MODEL, lr 1e-3, wd 1e-3)** | **98.70%** | **98.47%** | **11,189,850** | **5.5 min** |
+
+Training time of the final model is that of its selected tuning run, Config B: 332.2 s (`best_config.training_time_sec` in [`final_metrics.json`](results/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/metrics/final_metrics.json)). The whole 4-configuration search took about 15.4 min in total. All runs used an NVIDIA Tesla T4 GPU on Google Colab.
 
 **Final tuned model, all test metrics:**
 
@@ -128,18 +139,26 @@ All numbers are on the same held-out test set of **463 crops**, which was never 
 | Weighted F1 | 98.69% |
 
 **Baseline vs. tuned (Approach 3):**
-- **Test accuracy:** 98.06% (untuned baseline) → **98.70%** (tuned final model), **+0.65 percentage points**. That is 454 → 457 of 463 test crops correct.
+- **Test accuracy:** 98.06% (untuned baseline) → **98.70%** (tuned final model), **+0.65 percentage points**. That is 454 → 457 of 463 test crops correct, i.e. **3 additional correct predictions**.
 - **Macro F1:** 96.80% → **98.47%**, **+1.67 percentage points**.
+
+These differences come from a single training run per configuration with one seed (42), on a 463-image test set. No repeated runs or significance tests were carried out, so a difference of 3 test images may be within run-to-run variation. It should be read as "tuning did not hurt, and the selected model was slightly better on this test set", not as evidence that the tuned settings are reliably better.
 
 Macro F1 is the mean of the 26 per-class F1 scores, so every class counts equally regardless of size. Macro precision and macro recall are averaged the same way.
 
 **Discussion:**
 - **Transfer learning is the largest factor.** Moving from a CNN trained from scratch to frozen ImageNet features raises test accuracy from 70.19% to 92.44%.
 - **Fine-tuning adds a further large gain**, mostly on the rarer classes: macro F1 rises from 88.37% to 96.80%, because the network can adapt all of its features to this domain.
-- **Tuning adds a smaller, final improvement.**
+- **Tuning made little difference.** All four configurations achieved the same best validation accuracy in this single-seed comparison, although their validation losses differed. The selected configuration (chosen by validation loss) was 3 test images better than the untuned baseline.
 - The frozen model is the most parameter-efficient, reaching 92.44% with only 13,338 trainable parameters.
 
-The side-by-side table and comparison figures are produced by `notebooks/06_final_comparison.ipynb`.
+**Comparison figures** (produced by `notebooks/06_final_comparison.ipynb` from the saved results):
+
+![Test accuracy by approach](results/final_comparison/comparison_test_accuracy.png)
+
+![Macro F1 by approach](results/final_comparison/comparison_macro_f1.png)
+
+Further outputs are in [`results/final_comparison/`](results/final_comparison/): all metrics side by side, validation-accuracy curves of every approach, and the results table as CSV. Training and validation loss and accuracy curves for each approach are in `results/<approach>/<run>/figures/`.
 
 ## 8. Error Analysis
 
@@ -164,7 +183,7 @@ Observations from the results:
 | [`misclassified_test_images.csv`](results/final_model/misclassified_test_images.csv) | The six misclassified test images (true and predicted label, confidence, original annotation, crop size) |
 | [`misclassified_gallery.png`](results/final_model/misclassified_gallery.png) | Gallery of the six misclassified crops |
 | [`annotation_error_context.png`](results/final_model/annotation_error_context.png) | The three probable annotation errors in their original source photos |
-| Confusion matrix | Generated by `notebooks/05_hyperparameter_tuning.ipynb` and stored with the experiment outputs in `results/runs/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/` (Google Drive): `final_tuned_model/confusion_matrix.csv`, `figures/final_confusion_matrix.png`, `figures/final_confusion_matrix_normalized.png` |
+| Confusion matrix | [`confusion_matrix.csv`](results/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/final_tuned_model/confusion_matrix.csv), [`final_confusion_matrix.png`](results/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/figures/final_confusion_matrix.png), [`final_confusion_matrix_normalized.png`](results/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/figures/final_confusion_matrix_normalized.png). Generated by `notebooks/05_hyperparameter_tuning.ipynb`: 457 correct on the diagonal and 6 errors off it. |
 
 ## 9. Limitations
 

@@ -1,0 +1,185 @@
+{
+  "experiment": "approach2_resnet18_frozen_backbone",
+  "run_name": "20261006-085519_seed42",
+  "git_commit": "ddc6d1f",
+  "seed": 42,
+  "hyperparameters": {
+    "model_name": "resnet18_frozen",
+    "approach": "2_resnet18_frozen_backbone",
+    "pretrained": true,
+    "pretrained_weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "trainable_layers": "fc only (Linear 512 -> 26); backbone + BatchNorm statistics frozen",
+    "num_classes": 26,
+    "image_size": 224,
+    "batch_size": 32,
+    "num_workers": 2,
+    "optimizer": "Adam (trainable parameters only)",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "loss": "CrossEntropyLoss",
+    "max_epochs": 40,
+    "scheduler": "ReduceLROnPlateau",
+    "scheduler_mode": "max",
+    "scheduler_factor": 0.5,
+    "scheduler_patience": 3,
+    "monitor": "val_acc",
+    "early_stopping_patience": 10,
+    "seed": 42
+  },
+  "dataset": {
+    "num_classes": 26,
+    "class_names": [
+      "30_SPEED_LIMIT",
+      "40_SPEED_LIMIT",
+      "60_SPEED_LIMIT",
+      "80_SPEED_LIMIT",
+      "CARRIAGE_WAY_NARROWS",
+      "CHILDREN_CROSSING",
+      "CROSS_ROAD",
+      "DIRECTION",
+      "END_SPEED_LIMIT",
+      "HOSPITAL",
+      "KEEP_RIGHT",
+      "KM_POST",
+      "LEFT_BEND",
+      "NO_ENTRY",
+      "NO_HORN",
+      "NO_PARKING",
+      "NO_UTURN",
+      "PEDESTRAIN_CROSSING",
+      "PEDESTRAIN_CR_AREA",
+      "PRIORITY_ROAD",
+      "RIGHT_BEND",
+      "ROAD_JUNCTION_ON_THE_LEFT",
+      "ROAD_JUNCTION_ON_THE_RIGHT",
+      "SLOW_DOWN",
+      "STAGGERED_JUNCTION_RL",
+      "U_TURN"
+    ],
+    "train_samples": 2153,
+    "val_samples": 454,
+    "test_samples": 463,
+    "zero_parent_overlap": true
+  },
+  "model": {
+    "name": "resnet18_frozen",
+    "total_parameters": 11189850,
+    "trainable_parameters": 13338,
+    "frozen_parameters": 11176512,
+    "pretrained_weights": "ResNet18_Weights.IMAGENET1K_V1"
+  },
+  "training": {
+    "epochs_completed": 28,
+    "stopped_early": true,
+    "best_epoch": 18,
+    "best_val_acc": 0.9581497797356828,
+    "best_val_loss": 0.18523757975335164,
+    "train_acc_at_best_epoch": 0.9665582907570831,
+    "total_training_time_sec": 331.368927838,
+    "mean_epoch_time_sec": 11.790803286892858
+  },
+  "test": {
+    "test_loss": 0.27122224194699696,
+    "accuracy": 0.9244060475161987,
+    "precision_macro": 0.9159262002852836,
+    "recall_macro": 0.8787889194139195,
+    "f1_macro": 0.8837244727290225,
+    "precision_weighted": 0.9290375204927269,
+    "recall_weighted": 0.9244060475161987,
+    "f1_weighted": 0.9214027653827637,
+    "num_test_samples": 463
+  },
+  "error_analysis": {
+    "num_misclassified": 35,
+    "lowest_f1_classes": [
+      {
+        "class_name": "STAGGERED_JUNCTION_RL",
+        "f1": 0.3333333333333333,
+        "support": 5
+      },
+      {
+        "class_name": "ROAD_JUNCTION_ON_THE_LEFT",
+        "f1": 0.5,
+        "support": 16
+      },
+      {
+        "class_name": "RIGHT_BEND",
+        "f1": 0.7142857142857143,
+        "support": 7
+      },
+      {
+        "class_name": "ROAD_JUNCTION_ON_THE_RIGHT",
+        "f1": 0.71875,
+        "support": 28
+      },
+      {
+        "class_name": "LEFT_BEND",
+        "f1": 0.7777777777777778,
+        "support": 9
+      }
+    ],
+    "top_confusions": [
+      {
+        "true_label": "ROAD_JUNCTION_ON_THE_LEFT",
+        "pred_label": "ROAD_JUNCTION_ON_THE_RIGHT",
+        "count": 8,
+        "share_of_true_class": 0.5
+      },
+      {
+        "true_label": "ROAD_JUNCTION_ON_THE_RIGHT",
+        "pred_label": "ROAD_JUNCTION_ON_THE_LEFT",
+        "count": 5,
+        "share_of_true_class": 0.17857142857142858
+      },
+      {
+        "true_label": "PEDESTRAIN_CROSSING",
+        "pred_label": "CHILDREN_CROSSING",
+        "count": 3,
+        "share_of_true_class": 0.15
+      },
+      {
+        "true_label": "STAGGERED_JUNCTION_RL",
+        "pred_label": "ROAD_JUNCTION_ON_THE_RIGHT",
+        "count": 3,
+        "share_of_true_class": 0.6
+      },
+      {
+        "true_label": "LEFT_BEND",
+        "pred_label": "RIGHT_BEND",
+        "count": 2,
+        "share_of_true_class": 0.2222222222222222
+      }
+    ]
+  },
+  "hardware": {
+    "device": "cuda",
+    "gpu_name": "Tesla T4",
+    "gpu_memory_gb": 14.56,
+    "cuda_version": "13.0",
+    "cudnn_version": 92700,
+    "torch_version": "2.11.0+cu130",
+    "torchvision_version": "0.26.0+cu130",
+    "python_version": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "cpu_count": 2,
+    "colab": true
+  },
+  "artifacts": {
+    "checkpoint": "checkpoints/resnet18_frozen_best.pt",
+    "history": "metrics/history.json",
+    "classification_report": "metrics/classification_report.csv",
+    "confusion_matrix": "metrics/confusion_matrix.csv",
+    "test_predictions": "metrics/test_predictions.csv",
+    "per_class_metrics": "error_analysis/per_class_metrics.csv",
+    "confused_pairs": "error_analysis/confused_pairs.csv",
+    "misclassified": "error_analysis/misclassified.csv",
+    "figures": [
+      "figures/accuracy_curve.png",
+      "figures/confusion_matrix.png",
+      "figures/confusion_matrix_normalized.png",
+      "figures/loss_curve.png",
+      "figures/misclassified_examples.png",
+      "figures/per_class_f1.png"
+    ]
+  }
+}

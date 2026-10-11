@@ -1,0 +1,70 @@
+{
+  "final_model": "3. ResNet-18 fine-tuned, tuned (config B: lr=0.001, wd=0.001) - FINAL MODEL",
+  "selected_config": {
+    "config": "B",
+    "learning_rate": 0.001,
+    "weight_decay": 0.001,
+    "best_val_acc": 0.9977973568281938
+  },
+  "final_test_metrics": {
+    "accuracy": 0.9870410367170627,
+    "precision_macro": 0.9872378956513573,
+    "recall_macro": 0.9836347680097681,
+    "f1_macro": 0.9846557042290928,
+    "f1_weighted": 0.9869214785865981
+  },
+  "baseline_test_accuracy": 0.980561555075594,
+  "test_accuracy_improvement_pp": 0.6479481641468721,
+  "results_table": [
+    {
+      "Approach": "1. SmallCNN from scratch",
+      "Test Accuracy": 0.7019438444924406,
+      "Macro Precision": 0.5395244303600613,
+      "Macro Recall": 0.5280390211640212,
+      "Macro F1": 0.5078234857895669,
+      "Weighted F1": 0.6748193875429066,
+      "Trainable Parameters": 133178,
+      "Training Time (min)": 8.111145304683332,
+      "Best Val Accuracy": 0.748898678414097
+    },
+    {
+      "Approach": "2. ResNet-18 frozen backbone",
+      "Test Accuracy": 0.9244060475161987,
+      "Macro Precision": 0.9159262002852836,
+      "Macro Recall": 0.8787889194139195,
+      "Macro F1": 0.8837244727290225,
+      "Weighted F1": 0.9214027653827637,
+      "Trainable Parameters": 13338,
+      "Training Time (min)": 5.5228154639666664,
+      "Best Val Accuracy": 0.9581497797356828
+    },
+    {
+      "Approach": "3. ResNet-18 fully fine-tuned (baseline)",
+      "Test Accuracy": 0.980561555075594,
+      "Macro Precision": 0.9716007283314976,
+      "Macro Recall": 0.9696314102564103,
+      "Macro F1": 0.9680140681794883,
+      "Weighted F1": 0.9807494144434069,
+      "Trainable Parameters": 11189850,
+      "Training Time (min)": 4.002047268233336,
+      "Best Val Accuracy": 0.9977973568281938
+    },
+    {
+      "Approach": "3. ResNet-18 fine-tuned, tuned (config B: lr=0.001, wd=0.001) - FINAL MODEL",
+      "Test Accuracy": 0.9870410367170627,
+      "Macro Precision": 0.9872378956513573,
+      "Macro Recall": 0.9836347680097681,
+      "Macro F1": 0.9846557042290928,
+      "Weighted F1": 0.9869214785865981,
+      "Trainable Parameters": 11189850,
+      "Training Time (min)": 5.5369928203499965,
+      "Best Val Accuracy": 0.9977973568281938
+    }
+  ],
+  "sources": {
+    "small_cnn": "small_cnn/20261006-081721_seed42/metrics/results.json",
+    "resnet18_frozen": "resnet18_frozen/20261006-085519_seed42/metrics/results.json",
+    "resnet18_finetuned": "resnet18_finetuned/20261006-130538_seed42/metrics/results.json",
+    "hyperparameter_tuning": "hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/metrics/final_metrics.json"
+  }
+}

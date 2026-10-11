@@ -1,0 +1,191 @@
+{
+  "experiment": "approach3_resnet18_fully_finetuned_hyperparameter_tuning",
+  "git_commit": "9559715",
+  "seed": 42,
+  "fixed_hyperparameters": {
+    "model_name": "resnet18_finetuned",
+    "approach": "3_resnet18_fully_finetuned",
+    "pretrained_weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "trainable_layers": "all layers (full backbone + new Linear 512 -> 26)",
+    "num_classes": 26,
+    "image_size": 224,
+    "batch_size": 32,
+    "num_workers": 2,
+    "optimizer": "Adam (all parameters)",
+    "loss": "CrossEntropyLoss",
+    "max_epochs": 40,
+    "scheduler": "ReduceLROnPlateau",
+    "scheduler_mode": "max",
+    "scheduler_factor": 0.5,
+    "scheduler_patience": 3,
+    "monitor": "val_acc",
+    "early_stopping_patience": 10,
+    "seed": 42
+  },
+  "tuned_hyperparameters": {
+    "learning_rate": [
+      0.001,
+      0.001,
+      0.0001,
+      0.0001
+    ],
+    "weight_decay": [
+      0.0001,
+      0.001,
+      0.0001,
+      0.001
+    ]
+  },
+  "selection_rule": "highest best validation accuracy; ties broken by lower validation loss at the best epoch, then by configuration order",
+  "best_config": {
+    "config": "B",
+    "learning_rate": 0.001,
+    "weight_decay": 0.001,
+    "best_val_acc": 0.9977973568281938,
+    "val_loss_at_best_epoch": 0.027960643553819164,
+    "best_val_loss": 0.019745773389640096,
+    "train_acc_at_best_epoch": 0.9939619136089178,
+    "best_epoch": 14,
+    "epochs_completed": 24,
+    "stopped_early": true,
+    "training_time_sec": 332.2195692209998,
+    "trainable_parameters": 11189850,
+    "checkpoint": "configs/config_B/best_checkpoint.pt",
+    "selection_rule": "highest best validation accuracy; ties broken by lower validation loss at the best epoch, then by configuration order",
+    "tied_on_val_acc": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "ranking": [
+      "B",
+      "A",
+      "D",
+      "C"
+    ]
+  },
+  "tuning_results": [
+    {
+      "config": "A",
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.029032679112107055,
+      "best_val_loss": 0.023033628667425775,
+      "train_acc_at_best_epoch": 0.9972131908964236,
+      "best_epoch": 8,
+      "epochs_completed": 18,
+      "stopped_early": true,
+      "training_time_sec": 234.53786157800005,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_A/best_checkpoint.pt"
+    },
+    {
+      "config": "B",
+      "learning_rate": 0.001,
+      "weight_decay": 0.001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.027960643553819164,
+      "best_val_loss": 0.019745773389640096,
+      "train_acc_at_best_epoch": 0.9939619136089178,
+      "best_epoch": 14,
+      "epochs_completed": 24,
+      "stopped_early": true,
+      "training_time_sec": 332.2195692209998,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_B/best_checkpoint.pt"
+    },
+    {
+      "config": "C",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.03301495789562553,
+      "best_val_loss": 0.021534633668886277,
+      "train_acc_at_best_epoch": 0.995355318160706,
+      "best_epoch": 3,
+      "epochs_completed": 13,
+      "stopped_early": true,
+      "training_time_sec": 174.10327095999992,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_C/best_checkpoint.pt"
+    },
+    {
+      "config": "D",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.03243213640074635,
+      "best_val_loss": 0.02107079226794419,
+      "train_acc_at_best_epoch": 0.995355318160706,
+      "best_epoch": 3,
+      "epochs_completed": 13,
+      "stopped_early": true,
+      "training_time_sec": 182.29180218400006,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_D/best_checkpoint.pt"
+    }
+  ],
+  "final_test_metrics": {
+    "test_loss": 0.07656461689178681,
+    "accuracy": 0.9870410367170627,
+    "precision_macro": 0.9872378956513573,
+    "recall_macro": 0.9836347680097681,
+    "f1_macro": 0.9846557042290928,
+    "precision_weighted": 0.9877352009641426,
+    "recall_weighted": 0.9870410367170627,
+    "f1_weighted": 0.9869214785865981,
+    "num_test_samples": 463
+  },
+  "baseline": {
+    "source": "/content/drive/MyDrive/Road_Sign_Recognition_CNN/results/runs/resnet18_finetuned/20261006-130538_seed42/metrics/results.json",
+    "accuracy": 0.980561555075594,
+    "precision_macro": 0.9716007283314976,
+    "recall_macro": 0.9696314102564103,
+    "f1_macro": 0.9680140681794883,
+    "f1_weighted": 0.9807494144434069
+  },
+  "test_accuracy_change_pp": 0.6479481641468721,
+  "model": {
+    "total_parameters": 11189850,
+    "trainable_parameters": 11189850,
+    "pretrained_weights": "ResNet18_Weights.IMAGENET1K_V1"
+  },
+  "hardware": {
+    "device": "cuda",
+    "gpu_name": "Tesla T4",
+    "gpu_memory_gb": 14.56,
+    "cuda_version": "13.0",
+    "cudnn_version": 92700,
+    "torch_version": "2.11.0+cu130",
+    "torchvision_version": "0.26.0+cu130",
+    "python_version": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "cpu_count": 2,
+    "colab": true
+  },
+  "summary": [
+    "Best configuration: Config B (lr = 0.001, weight decay = 0.001).",
+    "Why selected: highest best validation accuracy (99.78%); tied with ['A', 'C', 'D'] and selected by lower validation loss (0.0280). The test set was not used for this choice.",
+    "Final test performance: accuracy 98.70%, macro precision 98.72%, macro recall 98.36%, macro F1 98.47%, weighted F1 98.69%.",
+    "Compared with the Approach 3 baseline (98.06%): tuning improved test accuracy by +0.65 percentage points.",
+    "Trade-offs observed: Config A: val acc 99.78%, best epoch 8, 3.9 min; Config B: val acc 99.78%, best epoch 14, 5.5 min; Config C: val acc 99.78%, best epoch 3, 2.9 min; Config D: val acc 99.78%, best epoch 3, 3.0 min. Fastest run: Config C; slowest: Config B."
+  ],
+  "artifacts": {
+    "tuning_results_csv": "metrics/tuning_results.csv",
+    "tuning_results_json": "metrics/tuning_results.json",
+    "best_config": "metrics/best_config.json",
+    "final_checkpoint": "final_tuned_model/resnet18_finetuned_tuned_best.pt",
+    "classification_report": "final_tuned_model/classification_report.csv",
+    "confusion_matrix": "final_tuned_model/confusion_matrix.csv",
+    "test_predictions": "final_tuned_model/test_predictions.csv",
+    "baseline_comparison": "final_tuned_model/baseline_comparison.csv",
+    "figures": [
+      "figures/final_confusion_matrix.png",
+      "figures/final_confusion_matrix_normalized.png",
+      "figures/tuning_best_val_accuracy.png",
+      "figures/tuning_val_curves.png"
+    ]
+  }
+}

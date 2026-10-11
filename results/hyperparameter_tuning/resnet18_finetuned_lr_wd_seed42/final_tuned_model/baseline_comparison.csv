@@ -1,0 +1,6 @@
+Metric,Approach 3 baseline,Tuned Approach 3,Change (pp)
+Test accuracy,98.06%,98.70%,+0.65
+Macro precision,97.16%,98.72%,+1.56
+Macro recall,96.96%,98.36%,+1.40
+Macro F1,96.80%,98.47%,+1.66
+Weighted F1,98.07%,98.69%,+0.62

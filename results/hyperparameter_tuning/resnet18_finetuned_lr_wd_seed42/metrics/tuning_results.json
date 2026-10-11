@@ -1,0 +1,135 @@
+{
+  "fixed": {
+    "model_name": "resnet18_finetuned",
+    "approach": "3_resnet18_fully_finetuned",
+    "pretrained_weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "trainable_layers": "all layers (full backbone + new Linear 512 -> 26)",
+    "num_classes": 26,
+    "image_size": 224,
+    "batch_size": 32,
+    "num_workers": 2,
+    "optimizer": "Adam (all parameters)",
+    "loss": "CrossEntropyLoss",
+    "max_epochs": 40,
+    "scheduler": "ReduceLROnPlateau",
+    "scheduler_mode": "max",
+    "scheduler_factor": 0.5,
+    "scheduler_patience": 3,
+    "monitor": "val_acc",
+    "early_stopping_patience": 10,
+    "seed": 42
+  },
+  "configs": [
+    {
+      "name": "A",
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001
+    },
+    {
+      "name": "B",
+      "learning_rate": 0.001,
+      "weight_decay": 0.001
+    },
+    {
+      "name": "C",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0001
+    },
+    {
+      "name": "D",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.001
+    }
+  ],
+  "selection_rule": "highest best validation accuracy; ties broken by lower validation loss at the best epoch, then by configuration order",
+  "results": [
+    {
+      "config": "A",
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.029032679112107055,
+      "best_val_loss": 0.023033628667425775,
+      "train_acc_at_best_epoch": 0.9972131908964236,
+      "best_epoch": 8,
+      "epochs_completed": 18,
+      "stopped_early": true,
+      "training_time_sec": 234.53786157800005,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_A/best_checkpoint.pt"
+    },
+    {
+      "config": "B",
+      "learning_rate": 0.001,
+      "weight_decay": 0.001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.027960643553819164,
+      "best_val_loss": 0.019745773389640096,
+      "train_acc_at_best_epoch": 0.9939619136089178,
+      "best_epoch": 14,
+      "epochs_completed": 24,
+      "stopped_early": true,
+      "training_time_sec": 332.2195692209998,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_B/best_checkpoint.pt"
+    },
+    {
+      "config": "C",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.0001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.03301495789562553,
+      "best_val_loss": 0.021534633668886277,
+      "train_acc_at_best_epoch": 0.995355318160706,
+      "best_epoch": 3,
+      "epochs_completed": 13,
+      "stopped_early": true,
+      "training_time_sec": 174.10327095999992,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_C/best_checkpoint.pt"
+    },
+    {
+      "config": "D",
+      "learning_rate": 0.0001,
+      "weight_decay": 0.001,
+      "best_val_acc": 0.9977973568281938,
+      "val_loss_at_best_epoch": 0.03243213640074635,
+      "best_val_loss": 0.02107079226794419,
+      "train_acc_at_best_epoch": 0.995355318160706,
+      "best_epoch": 3,
+      "epochs_completed": 13,
+      "stopped_early": true,
+      "training_time_sec": 182.29180218400006,
+      "trainable_parameters": 11189850,
+      "checkpoint": "configs/config_D/best_checkpoint.pt"
+    }
+  ],
+  "best_config": {
+    "config": "B",
+    "learning_rate": 0.001,
+    "weight_decay": 0.001,
+    "best_val_acc": 0.9977973568281938,
+    "val_loss_at_best_epoch": 0.027960643553819164,
+    "best_val_loss": 0.019745773389640096,
+    "train_acc_at_best_epoch": 0.9939619136089178,
+    "best_epoch": 14,
+    "epochs_completed": 24,
+    "stopped_early": true,
+    "training_time_sec": 332.2195692209998,
+    "trainable_parameters": 11189850,
+    "checkpoint": "configs/config_B/best_checkpoint.pt",
+    "selection_rule": "highest best validation accuracy; ties broken by lower validation loss at the best epoch, then by configuration order",
+    "tied_on_val_acc": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "ranking": [
+      "B",
+      "A",
+      "D",
+      "C"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+                            precision    recall  f1-score   support
+
+            30_SPEED_LIMIT      1.000     1.000     1.000         3
+            40_SPEED_LIMIT      1.000     1.000     1.000        12
+            60_SPEED_LIMIT      1.000     1.000     1.000         7
+            80_SPEED_LIMIT      1.000     1.000     1.000         6
+      CARRIAGE_WAY_NARROWS      1.000     1.000     1.000         5
+         CHILDREN_CROSSING      0.964     1.000     0.982        27
+                CROSS_ROAD      0.900     1.000     0.947         9
+                 DIRECTION      1.000     1.000     1.000        28
+           END_SPEED_LIMIT      1.000     1.000     1.000         5
+                  HOSPITAL      1.000     1.000     1.000        10
+                KEEP_RIGHT      0.978     1.000     0.989        44
+                   KM_POST      0.990     0.990     0.990        96
+                 LEFT_BEND      1.000     0.889     0.941         9
+                  NO_ENTRY      1.000     0.857     0.923         7
+                   NO_HORN      1.000     1.000     1.000        10
+                NO_PARKING      1.000     1.000     1.000         8
+                  NO_UTURN      1.000     1.000     1.000        21
+       PEDESTRAIN_CROSSING      1.000     0.950     0.974        20
+        PEDESTRAIN_CR_AREA      1.000     1.000     1.000        32
+             PRIORITY_ROAD      1.000     0.889     0.941        18
+                RIGHT_BEND      0.875     1.000     0.933         7
+ ROAD_JUNCTION_ON_THE_LEFT      1.000     1.000     1.000        16
+ROAD_JUNCTION_ON_THE_RIGHT      1.000     1.000     1.000        28
+                 SLOW_DOWN      0.962     1.000     0.980        25
+     STAGGERED_JUNCTION_RL      1.000     1.000     1.000         5
+                    U_TURN      1.000     1.000     1.000         5
+
+                  accuracy                          0.987       463
+                 macro avg      0.987     0.984     0.985       463
+              weighted avg      0.988     0.987     0.987       463

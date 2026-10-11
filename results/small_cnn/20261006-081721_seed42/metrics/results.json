@@ -1,0 +1,190 @@
+{
+  "experiment": "approach1_small_cnn_from_scratch",
+  "run_name": "20261006-081721_seed42",
+  "git_commit": "7fbc2fc",
+  "seed": 42,
+  "hyperparameters": {
+    "model_name": "small_cnn",
+    "approach": "1_cnn_from_scratch",
+    "pretrained": false,
+    "num_classes": 26,
+    "image_size": 224,
+    "batch_size": 32,
+    "num_workers": 2,
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "loss": "CrossEntropyLoss",
+    "max_epochs": 40,
+    "scheduler": "ReduceLROnPlateau",
+    "scheduler_mode": "max",
+    "scheduler_factor": 0.5,
+    "scheduler_patience": 3,
+    "monitor": "val_acc",
+    "early_stopping_patience": 10,
+    "seed": 42,
+    "model_kwargs": {
+      "channels": [
+        32,
+        64,
+        128
+      ],
+      "hidden_dim": 256,
+      "dropout": 0.5
+    }
+  },
+  "dataset": {
+    "num_classes": 26,
+    "class_names": [
+      "30_SPEED_LIMIT",
+      "40_SPEED_LIMIT",
+      "60_SPEED_LIMIT",
+      "80_SPEED_LIMIT",
+      "CARRIAGE_WAY_NARROWS",
+      "CHILDREN_CROSSING",
+      "CROSS_ROAD",
+      "DIRECTION",
+      "END_SPEED_LIMIT",
+      "HOSPITAL",
+      "KEEP_RIGHT",
+      "KM_POST",
+      "LEFT_BEND",
+      "NO_ENTRY",
+      "NO_HORN",
+      "NO_PARKING",
+      "NO_UTURN",
+      "PEDESTRAIN_CROSSING",
+      "PEDESTRAIN_CR_AREA",
+      "PRIORITY_ROAD",
+      "RIGHT_BEND",
+      "ROAD_JUNCTION_ON_THE_LEFT",
+      "ROAD_JUNCTION_ON_THE_RIGHT",
+      "SLOW_DOWN",
+      "STAGGERED_JUNCTION_RL",
+      "U_TURN"
+    ],
+    "train_samples": 2153,
+    "val_samples": 454,
+    "test_samples": 463,
+    "zero_parent_overlap": true
+  },
+  "model": {
+    "name": "small_cnn",
+    "total_parameters": 133178,
+    "trainable_parameters": 133178
+  },
+  "training": {
+    "epochs_completed": 40,
+    "stopped_early": false,
+    "best_epoch": 37,
+    "best_val_acc": 0.748898678414097,
+    "best_val_loss": 0.742711908294766,
+    "train_acc_at_best_epoch": 0.7199256850905713,
+    "total_training_time_sec": 486.6687182809999,
+    "mean_epoch_time_sec": 12.158662676025022
+  },
+  "test": {
+    "test_loss": 0.8687814590933514,
+    "accuracy": 0.7019438444924406,
+    "precision_macro": 0.5395244303600613,
+    "recall_macro": 0.5280390211640212,
+    "f1_macro": 0.5078234857895669,
+    "precision_weighted": 0.6865525929316469,
+    "recall_weighted": 0.7019438444924406,
+    "f1_weighted": 0.6748193875429066,
+    "num_test_samples": 463
+  },
+  "error_analysis": {
+    "num_misclassified": 138,
+    "lowest_f1_classes": [
+      {
+        "class_name": "30_SPEED_LIMIT",
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "class_name": "STAGGERED_JUNCTION_RL",
+        "f1": 0.0,
+        "support": 5
+      },
+      {
+        "class_name": "80_SPEED_LIMIT",
+        "f1": 0.0,
+        "support": 6
+      },
+      {
+        "class_name": "60_SPEED_LIMIT",
+        "f1": 0.0,
+        "support": 7
+      },
+      {
+        "class_name": "RIGHT_BEND",
+        "f1": 0.0,
+        "support": 7
+      }
+    ],
+    "top_confusions": [
+      {
+        "true_label": "PRIORITY_ROAD",
+        "pred_label": "CHILDREN_CROSSING",
+        "count": 11,
+        "share_of_true_class": 0.6111111111111112
+      },
+      {
+        "true_label": "ROAD_JUNCTION_ON_THE_RIGHT",
+        "pred_label": "CHILDREN_CROSSING",
+        "count": 11,
+        "share_of_true_class": 0.39285714285714285
+      },
+      {
+        "true_label": "PEDESTRAIN_CROSSING",
+        "pred_label": "CHILDREN_CROSSING",
+        "count": 10,
+        "share_of_true_class": 0.5
+      },
+      {
+        "true_label": "ROAD_JUNCTION_ON_THE_RIGHT",
+        "pred_label": "PEDESTRAIN_CROSSING",
+        "count": 8,
+        "share_of_true_class": 0.2857142857142857
+      },
+      {
+        "true_label": "60_SPEED_LIMIT",
+        "pred_label": "40_SPEED_LIMIT",
+        "count": 7,
+        "share_of_true_class": 1.0
+      }
+    ]
+  },
+  "hardware": {
+    "device": "cuda",
+    "gpu_name": "Tesla T4",
+    "gpu_memory_gb": 14.56,
+    "cuda_version": "13.0",
+    "cudnn_version": 92700,
+    "torch_version": "2.11.0+cu130",
+    "torchvision_version": "0.26.0+cu130",
+    "python_version": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "cpu_count": 2,
+    "colab": true
+  },
+  "artifacts": {
+    "checkpoint": "checkpoints/small_cnn_best.pt",
+    "history": "metrics/history.json",
+    "classification_report": "metrics/classification_report.csv",
+    "confusion_matrix": "metrics/confusion_matrix.csv",
+    "test_predictions": "metrics/test_predictions.csv",
+    "per_class_metrics": "error_analysis/per_class_metrics.csv",
+    "confused_pairs": "error_analysis/confused_pairs.csv",
+    "misclassified": "error_analysis/misclassified.csv",
+    "figures": [
+      "figures/accuracy_curve.png",
+      "figures/confusion_matrix.png",
+      "figures/confusion_matrix_normalized.png",
+      "figures/loss_curve.png",
+      "figures/misclassified_examples.png",
+      "figures/per_class_f1.png"
+    ]
+  }
+}

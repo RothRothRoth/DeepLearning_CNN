@@ -1,0 +1,15 @@
+{
+  "config": "C",
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0001,
+  "best_val_acc": 0.9977973568281938,
+  "val_loss_at_best_epoch": 0.03301495789562553,
+  "best_val_loss": 0.021534633668886277,
+  "train_acc_at_best_epoch": 0.995355318160706,
+  "best_epoch": 3,
+  "epochs_completed": 13,
+  "stopped_early": true,
+  "training_time_sec": 174.10327095999992,
+  "trainable_parameters": 11189850,
+  "checkpoint": "configs/config_C/best_checkpoint.pt"
+}
