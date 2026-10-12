@@ -1,5 +1,7 @@
 # Road Sign Recognition Using Deep Learning
 
+**Author:** Tes Sothyroth
+
 ## 1. Project Overview
 
 This project develops and compares deep learning approaches for recognising Cambodian traffic signs.
@@ -23,7 +25,7 @@ The goal is to find out how much each level of transfer learning helps on this s
 
 ## 3. Dataset and Source
 
-**Source:** Cambodia Traffic Signs Dataset (CamTSD), obtained from Kaggle (dataset `cambodia-traffic-signs-dataset`). The raw release contains 2,766 street-scene images and 3,490 bounding-box sign annotations in VIA JSON format (`CAM_TSR_v3_json.json`).
+**Source:** [Cambodia Traffic Signs Dataset](https://www.kaggle.com/datasets/sophalratitya/cambodia-traffic-signs-dataset) by Sophal Ratitya on Kaggle (`sophalratitya/cambodia-traffic-signs-dataset`, version 1). **License: Apache 2.0**, as stated on the Kaggle dataset page. The raw release contains 2,766 street-scene images and 3,490 bounding-box sign annotations in VIA JSON format (`CAM_TSR_v3_json.json`).
 
 **From raw annotations to classification crops:**
 
@@ -140,7 +142,7 @@ Training time of the final model is that of its selected tuning run, Config B: 3
 
 **Baseline vs. tuned (Approach 3):**
 - **Test accuracy:** 98.06% (untuned baseline) → **98.70%** (tuned final model), **+0.65 percentage points**. That is 454 → 457 of 463 test crops correct, i.e. **3 additional correct predictions**.
-- **Macro F1:** 96.80% → **98.47%**, **+1.67 percentage points**.
+- **Macro F1:** 96.80% → **98.47%**, **+1.66 percentage points** (exact difference 1.664 pp, as in `results/final_comparison/tuning_improvement.csv`).
 
 These differences come from a single training run per configuration with one seed (42), on a 463-image test set. No repeated runs or significance tests were carried out, so a difference of 3 test images may be within run-to-run variation. It should be read as "tuning did not hurt, and the selected model was slightly better on this test set", not as evidence that the tuned settings are reliably better.
 
@@ -159,6 +161,12 @@ Macro F1 is the mean of the 26 per-class F1 scores, so every class counts equall
 ![Macro F1 by approach](results/final_comparison/comparison_macro_f1.png)
 
 Further outputs are in [`results/final_comparison/`](results/final_comparison/): all metrics side by side, validation-accuracy curves of every approach, and the results table as CSV. Training and validation loss and accuracy curves for each approach are in `results/<approach>/<run>/figures/`.
+
+**Overfitting and underfitting (from the saved training and validation curves):**
+- **SmallCNN from scratch: underfitting.** Training accuracy rises slowly to about 73% and validation accuracy to about 74–75%. Both losses are still decreasing slowly at epoch 40, and the best epoch is 37, so early stopping never triggered. Validation accuracy is slightly *above* training accuracy in 39 of 40 epochs; training accuracy is measured on augmented images with dropout active. The model has not even fitted the training data well, which points to limited capacity and too little data to learn good features from scratch. ([loss](results/small_cnn/20261006-081721_seed42/figures/loss_curve.png), [accuracy](results/small_cnn/20261006-081721_seed42/figures/accuracy_curve.png))
+- **ResNet-18, frozen backbone: good fit, slight overfitting tendency.** Training accuracy reaches about 97% and validation accuracy 95–96%. The gap is +0.8 pp at the best epoch (18) and grows to +2.3 pp by the last epoch (28), when early stopping ends training. Validation loss is still at its lowest at epoch 27, so there is no strong overfitting. The limiting factor is that only one linear layer can learn. ([loss](results/resnet18_frozen/20261006-085519_seed42/figures/loss_curve.png), [accuracy](results/resnet18_frozen/20261006-085519_seed42/figures/accuracy_curve.png))
+- **ResNet-18, fully fine-tuned (baseline): fits the training data almost perfectly, with mild overfitting in the loss.** By epoch 18, training accuracy is 100% and training loss 0.002. Validation accuracy stays between 99.3% and 99.8% after epoch 8, but validation loss rises from its minimum of 0.023 (epoch 7) to 0.042–0.059 from epoch 12 onwards, i.e. the model becomes over-confident on some validation images. Keeping the best-validation checkpoint (epoch 8) and early stopping limit this effect. The validation curves also fluctuate strongly in the first epochs (validation accuracy drops to 91% at epoch 4), which suggests a learning rate of 1e-3 is aggressive for pretrained weights. ([loss](results/resnet18_finetuned/20261006-130538_seed42/figures/loss_curve.png), [accuracy](results/resnet18_finetuned/20261006-130538_seed42/figures/accuracy_curve.png))
+- **Tuned model (Config B, weight decay 1e-3):** a similar near-perfect training fit. Validation loss stays between 0.020 and 0.032 after its minimum and ends at 0.027, compared with 0.047 for the baseline. That is consistent with the stronger weight decay acting as regularisation, but it comes from a single run. Early fluctuations are also present (validation accuracy 85% at epoch 6). ([validation curves of all four configurations](results/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/figures/tuning_val_curves.png))
 
 ## 8. Error Analysis
 
@@ -195,6 +203,14 @@ Observations from the results:
 - **Probable annotation errors:** three of the final model's six misclassified test images appear to be annotation errors based on visual inspection and comparison with the original dataset annotations. Only the misclassified test images were inspected, so annotation quality across the rest of the dataset was not assessed.
 - **Visually similar classes:** several classes differ only in small details (left vs. right junction and bend signs, the 30 / 40 / 60 / 80 speed limits), which makes them inherently harder to separate.
 
+### Future work
+- **Repeat each experiment with several random seeds** (and ideally cross-validation), to measure run-to-run variation before drawing conclusions from small differences such as the +3 test images from tuning.
+- **Review the annotations.** Report the three probable annotation errors to the dataset author, and check the training data for similar label noise.
+- **Help the rare classes:** collect more images of them, or try class-balanced sampling or a class-weighted loss.
+- **Stabilise fine-tuning:** try a lower learning rate or a learning-rate warm-up for the pretrained layers, given the early validation fluctuations seen in the curves.
+- **Detect signs in full street scenes.** The raw dataset also includes YOLO-format label files, so an object detector could be trained to find and classify signs end to end.
+- **Test robustness** on small, blurred and occluded signs, which caused most of the final model's genuine errors, and compare other architectures (e.g. EfficientNet or a Vision Transformer).
+
 ## 10. How to Run
 
 The experiments are designed for **Google Colab with a GPU** (Runtime → Change runtime type → T4 GPU). The cropped dataset is read from Google Drive:
@@ -217,6 +233,53 @@ Each notebook mounts Drive, clones this repository, and checks the split against
 
 Results, checkpoints and figures are written to `MyDrive/Road_Sign_Recognition_CNN/results/runs/<experiment>/`.
 
+**Installation** (for running locally; Google Colab already provides these packages):
+
+*CPU, or any machine (tests, evaluation, reading results):*
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs torch 2.11.0 and torchvision 0.26.0, but **it does not guarantee a CUDA-enabled build**. Depending on the platform, pip may install a CPU-only build.
+
+*GPU, matching the training environment (CUDA 13.0 build):* install the CUDA builds of PyTorch first, then the remaining packages:
+
+```bash
+pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu130
+```
+
+```bash
+pip install -r requirements.txt
+```
+
+The CUDA 13.0 wheels (`torch-2.11.0+cu130`, `torchvision-0.26.0+cu130`) are published on the official PyTorch package index for Python 3.13 on Linux x86_64 and Windows, and need an NVIDIA driver that supports CUDA 13.0. Check the result with:
+
+```bash
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+It should print `2.11.0+cu130 True` on a working GPU setup.
+
+**Environment:**
+- **Training environment (recorded):** the reported experiments ran on Google Colab with **Python 3.13.15, PyTorch 2.11.0+cu130 and torchvision 0.26.0+cu130** on an NVIDIA Tesla T4 GPU, as recorded in every `results.json` (`hardware` field).
+- **`requirements.txt`:** torch and torchvision are pinned to the versions recorded during training. The versions of NumPy, pandas, scikit-learn, Matplotlib and Pillow were **not** recorded during training. Their pins are the versions observed in a later, **CPU-only** Colab session (Python 3.13.16, torch 2.11.0+cpu), so that session is not identical to the original GPU training environment, and these package versions may differ from those used in training.
+
+**Trained model checkpoint (final tuned model):**
+- **File:** `resnet18_finetuned_tuned_best.pt`, about 131 MiB, ResNet-18 fully fine-tuned, Config B. It is not stored in this repository because of its size.
+- **Download link:** `<PASTE_GOOGLE_DRIVE_SHARE_LINK_HERE>` *(link to be added)*
+- **Original location (Google Drive):** `Road_Sign_Recognition_CNN/results/runs/hyperparameter_tuning/resnet18_finetuned_lr_wd_seed42/final_tuned_model/`
+- **Loading it with the project code:**
+
+```python
+from src.models import create_resnet18_finetuned
+from src.training import load_checkpoint
+
+model = create_resnet18_finetuned(num_classes=26)
+checkpoint = load_checkpoint("resnet18_finetuned_tuned_best.pt", model=model, map_location="cpu")
+model.eval()
+```
+
 **Local sanity tests** (no dataset needed):
 
 ```bash
@@ -231,13 +294,12 @@ python -m tests.test_training
 python -m tests.test_resnet
 ```
 
-These need PyTorch, torchvision, NumPy, pandas, scikit-learn, Matplotlib and Pillow (`requirements.txt` is currently empty; Colab provides these packages).
-
 ## 11. Repository Structure
 
 ```
 DeepLearning_CNN/
 ├── README.md
+├── requirements.txt                     # Python package versions (see Section 10)
 ├── Road_Sign_Recognition_CNN.ipynb      # original project notebook (overview, dataset exploration)
 ├── dataset/
 │   └── splits/                          # committed leak-free split manifests
@@ -271,7 +333,7 @@ AI tools were used to assist with code development, debugging, documentation and
 
 ## 13. References
 
-- Cambodia Traffic Signs Dataset (CamTSD). Kaggle, dataset `cambodia-traffic-signs-dataset`.
+- S. Ratitya. *Cambodia Traffic Signs Dataset*. Kaggle, version 1, 2025. License: Apache 2.0. https://www.kaggle.com/datasets/sophalratitya/cambodia-traffic-signs-dataset
 - K. He, X. Zhang, S. Ren and J. Sun. "Deep Residual Learning for Image Recognition." *Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2016.
 - J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li and L. Fei-Fei. "ImageNet: A Large-Scale Hierarchical Image Database." *CVPR*, 2009.
 - D. P. Kingma and J. Ba. "Adam: A Method for Stochastic Optimization." *International Conference on Learning Representations (ICLR)*, 2015.

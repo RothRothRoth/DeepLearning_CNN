@@ -1,0 +1,27 @@
+# Road Sign Recognition Using Deep Learning: Python package requirements
+#
+# 1) ORIGINAL TRAINING ENVIRONMENT (recorded in the "hardware" field of every results.json)
+#    Google Colab, NVIDIA Tesla T4 GPU, CUDA 13.0, Python 3.13.15,
+#    torch 2.11.0+cu130, torchvision 0.26.0+cu130.
+#    The versions of the other packages were NOT recorded during training.
+#
+# 2) WHAT THIS FILE PINS
+#    - torch / torchvision: the versions recorded during training (2.11.0 / 0.26.0).
+#      These pins do NOT select a CPU or CUDA build. Installing this file on its own
+#      does not guarantee CUDA support: depending on the platform, pip may install a
+#      CPU-only build or a different CUDA build. To get the CUDA 13.0 build used in
+#      training (wheels exist for Python 3.13 on Linux x86_64 and Windows), first run:
+#        pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu130
+#      and then:
+#        pip install -r requirements.txt
+#    - numpy, pandas, scikit-learn, matplotlib, Pillow: versions observed in a LATER
+#      Google Colab session (Python 3.13.16, CPU-only, torch 2.11.0+cpu), not in the
+#      original training session. They may differ from the versions used in training.
+
+torch==2.11.0
+torchvision==0.26.0
+numpy==2.1.3
+pandas==2.2.3
+scikit-learn==1.6.1
+matplotlib==3.10.0
+Pillow==11.3.0
