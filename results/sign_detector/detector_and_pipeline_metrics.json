@@ -1,0 +1,37 @@
+{
+  "smoke_test": false,
+  "detector": {
+    "start_weights": "yolov8s.pt",
+    "imgsz": 1280,
+    "epochs_requested": 50,
+    "batch": 6,
+    "seed": 42,
+    "ultralytics_version": "8.4.178",
+    "torch_version": "2.13.0+cu126",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "train_minutes_this_session": 73.7,
+    "best_weights": "D:\\DL_detector\\runs\\yolov8s_1280_seed42\\weights\\best.pt"
+  },
+  "dataset": {
+    "split_source": "dataset/splits/*.csv (same split as the classifier)",
+    "build": "reused existing dataset at D:\\DL_detector\\yolo_signs"
+  },
+  "detector_test_metrics": {
+    "precision": 0.9557312048379565,
+    "recall": 0.9634160766194272,
+    "mAP50": 0.9781571351912617,
+    "mAP50_95": 0.8732046206507815
+  },
+  "end_to_end_test": {
+    "test_photos": 379,
+    "test_signs_26_classes": 463,
+    "detections_total": 521,
+    "detection_recall_26_classes": 0.9697624190064795,
+    "end_to_end_accuracy": 0.9611231101511879,
+    "classifier_accuracy_on_detected_signs": 0.9910913140311804,
+    "unmatched_detections": 72,
+    "detector_conf_threshold": 0.25,
+    "note": "unmatched detections are false positives OR real signs outside the 26 classes (e.g. UNDEFINED)"
+  },
+  "classifier_checkpoint": "D:\\DL_checkpoint\\resnet18_finetuned_tuned_best.pt"
+}

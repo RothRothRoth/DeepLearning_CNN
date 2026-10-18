@@ -1,0 +1,320 @@
+{
+ "design": "Leakage check for the grouped folds: sign crop + surrounding scene similarity across train / val / test.\n\nFor every crop, a context window (3x the sign box, square, clipped to the photo) is embedded with ImageNet\nResNet-18 features. Calibration:\n  same physical sign   = same class, same GoPro recording and chapter, frames < 2 s apart\n  reference (unlinked) = same class, different drive clusters\nFlag threshold (fixed rule) = 10th percentile of the same-sign similarities.\nFor each outer fold, every val / test crop whose most similar SAME-CLASS training crop is above the threshold is\nreported as a POSSIBLE match (it can also be a different sign in a similar-looking place). A contact sheet of the\nstrongest test matches is saved for visual inspection.\n\nOutputs: D:\\DL_phase3\\leakage\\  (features, contact sheet) and results/grouped_evaluation/leakage_check.json\n",
+ "calibration": {
+  "same_sign_pairs": 461,
+  "same_sign_median": 0.8578518629074097,
+  "reference_pairs": 338036,
+  "reference_median": 0.7570046186447144,
+  "reference_p99": 0.8855485320091248,
+  "reference_p999": 0.9166978597640991,
+  "threshold_p10_same_sign": 0.7537902593612671,
+  "reference_pairs_above_threshold_pct": 52.04209019157723
+ },
+ "folds": [
+  {
+   "outer_fold": 0,
+   "val_crops": 538,
+   "val_possible_matches": 532,
+   "val_possible_match_pct": 98.88,
+   "test_crops": 522,
+   "test_possible_matches": 522,
+   "test_possible_match_pct": 100.0,
+   "test_flagged_examples": [
+    [
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_29.08.176_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010112.MP4_snapshot_11.53.179_crop00_23.jpg",
+     0.9495276212692261
+    ],
+    [
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_17.45.730_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010112.MP4_snapshot_24.48.793_crop00_23.jpg",
+     0.9452375173568726
+    ],
+    [
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010113.MP4_snapshot_10.00.585_crop00_21.jpg",
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010111.MP4_snapshot_24.05.234_crop00_21.jpg",
+     0.9418712258338928
+    ],
+    [
+     "train/DIRECTION/GX020113.MP4_snapshot_16.56.737_crop00_07.jpg",
+     "train/DIRECTION/GX010114.MP4_snapshot_10.24.908_crop00_07.jpg",
+     0.9416458606719971
+    ],
+    [
+     "train/80_SPEED_LIMIT/GX010113.MP4_snapshot_16.23.745_crop00_03.jpg",
+     "test/80_SPEED_LIMIT/GX010116.MP4_snapshot_15.04.208_crop00_03.jpg",
+     0.9411887526512146
+    ],
+    [
+     "train/PRIORITY_ROAD/GX020113.MP4_snapshot_20.23.870_crop00_19.jpg",
+     "train/PRIORITY_ROAD/GX010111.MP4_snapshot_21.12.234_crop00_19.jpg",
+     0.9405704736709595
+    ],
+    [
+     "test/60_SPEED_LIMIT/GX020113.MP4_snapshot_14.39.461_crop00_02.jpg",
+     "test/60_SPEED_LIMIT/GX010111.MP4_snapshot_00.30.230_crop00_02.jpg",
+     0.9405115842819214
+    ],
+    [
+     "train/SLOW_DOWN/GX020113.MP4_snapshot_17.12.192_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010112.MP4_snapshot_11.53.179_crop00_23.jpg",
+     0.9400425553321838
+    ],
+    [
+     "test/60_SPEED_LIMIT/GX020113.MP4_snapshot_24.40.338_crop00_02.jpg",
+     "test/60_SPEED_LIMIT/GX010111.MP4_snapshot_00.30.230_crop00_02.jpg",
+     0.9398036003112793
+    ],
+    [
+     "test/ROAD_JUNCTION_ON_THE_RIGHT/GX010118.MP4_snapshot_05.49.219_crop00_22.jpg",
+     "train/ROAD_JUNCTION_ON_THE_RIGHT/NR6_285_crop00_22.jpg",
+     0.9392015933990479
+    ]
+   ]
+  },
+  {
+   "outer_fold": 1,
+   "val_crops": 649,
+   "val_possible_matches": 644,
+   "val_possible_match_pct": 99.23,
+   "test_crops": 538,
+   "test_possible_matches": 529,
+   "test_possible_match_pct": 98.33,
+   "test_flagged_examples": [
+    [
+     "train/SLOW_DOWN/GX010119.MP4_snapshot_02.14.955_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_17.45.730_crop00_23.jpg",
+     0.9502438306808472
+    ],
+    [
+     "val/ROAD_JUNCTION_ON_THE_LEFT/GX010119.MP4_snapshot_10.51.514_crop00_21.jpg",
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010112.MP4_snapshot_19.10.601_crop00_21.jpg",
+     0.945216953754425
+    ],
+    [
+     "train/KEEP_RIGHT/NR5_21_crop00_10.jpg",
+     "train/KEEP_RIGHT/NR6_88_crop00_10.jpg",
+     0.9395599365234375
+    ],
+    [
+     "val/ROAD_JUNCTION_ON_THE_LEFT/GX010119.MP4_snapshot_14.10.913_crop00_21.jpg",
+     "test/ROAD_JUNCTION_ON_THE_LEFT/GX010111.MP4_snapshot_32.59.324_crop00_21.jpg",
+     0.9377861022949219
+    ],
+    [
+     "train/DIRECTION/NR2_53_crop00_07.jpg",
+     "test/DIRECTION/GX010217.MP4_snapshot_18.30.524_crop00_07.jpg",
+     0.9371976852416992
+    ],
+    [
+     "train/DIRECTION/NR5_76_crop00_07.jpg",
+     "test/DIRECTION/GX010217.MP4_snapshot_18.30.524_crop00_07.jpg",
+     0.9345242381095886
+    ],
+    [
+     "train/SLOW_DOWN/GX010119.MP4_snapshot_02.54.359_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_29.08.176_crop00_23.jpg",
+     0.9334531426429749
+    ],
+    [
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010119.MP4_snapshot_11.14.044_crop00_21.jpg",
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010112.MP4_snapshot_19.10.601_crop00_21.jpg",
+     0.9333118200302124
+    ],
+    [
+     "val/KEEP_RIGHT/NR5_65_crop00_10.jpg",
+     "train/KEEP_RIGHT/NR6_85_crop00_10.jpg",
+     0.9321675300598145
+    ],
+    [
+     "train/CARRIAGE_WAY_NARROWS/GX010131.MP4_snapshot_05.28.641_crop00_04.jpg",
+     "val/CARRIAGE_WAY_NARROWS/GX010118.MP4_snapshot_18.28.627_crop00_04.jpg",
+     0.9320113658905029
+    ]
+   ]
+  },
+  {
+   "outer_fold": 2,
+   "val_crops": 755,
+   "val_possible_matches": 747,
+   "val_possible_match_pct": 98.94,
+   "test_crops": 649,
+   "test_possible_matches": 642,
+   "test_possible_match_pct": 98.92,
+   "test_flagged_examples": [
+    [
+     "train/SLOW_DOWN/GX010117.MP4_snapshot_14.15.130_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_29.08.176_crop00_23.jpg",
+     0.9439663290977478
+    ],
+    [
+     "test/80_SPEED_LIMIT/GX010116.MP4_snapshot_15.04.208_crop00_03.jpg",
+     "train/80_SPEED_LIMIT/GX010113.MP4_snapshot_16.23.745_crop00_03.jpg",
+     0.9411887526512146
+    ],
+    [
+     "test/CHILDREN_CROSSING/NR1_113_crop00_05.jpg",
+     "test/CHILDREN_CROSSING/GX010111.MP4_snapshot_20.04.169_crop00_05.jpg",
+     0.9368627071380615
+    ],
+    [
+     "train/DIRECTION/GX010117.MP4_snapshot_01.18.721_crop01_07.jpg",
+     "train/DIRECTION/GX010118.MP4_snapshot_13.29.392_crop00_07.jpg",
+     0.9332543611526489
+    ],
+    [
+     "train/DIRECTION/GX010107.MP4_snapshot_20.17.693_crop00_07.jpg",
+     "train/DIRECTION/GX020113.MP4_snapshot_17.28.928_crop00_07.jpg",
+     0.9330204725265503
+    ],
+    [
+     "test/SLOW_DOWN/GX020116.MP4_snapshot_13.59.451_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_29.08.176_crop00_23.jpg",
+     0.9304938316345215
+    ],
+    [
+     "train/DIRECTION/NR1_4_crop00_07.jpg",
+     "train/DIRECTION/NR5_76_crop00_07.jpg",
+     0.9294030666351318
+    ],
+    [
+     "train/SLOW_DOWN/NR1_194_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010113.MP4_snapshot_29.08.176_crop00_23.jpg",
+     0.9290121793746948
+    ],
+    [
+     "train/DIRECTION/GX010115.MP4_snapshot_10.57.608_crop00_07.jpg",
+     "test/DIRECTION/NR2_55_crop00_07.jpg",
+     0.9285570383071899
+    ],
+    [
+     "train/PEDESTRAIN_CR_AREA/GX010117.MP4_snapshot_16.25.605_crop00_18.jpg",
+     "train/PEDESTRAIN_CR_AREA/GX010111.MP4_snapshot_07.49.025_crop00_18.jpg",
+     0.928552508354187
+    ]
+   ]
+  },
+  {
+   "outer_fold": 3,
+   "val_crops": 606,
+   "val_possible_matches": 603,
+   "val_possible_match_pct": 99.5,
+   "test_crops": 755,
+   "test_possible_matches": 749,
+   "test_possible_match_pct": 99.21,
+   "test_flagged_examples": [
+    [
+     "train/KEEP_RIGHT/NR6_88_crop00_10.jpg",
+     "train/KEEP_RIGHT/NR5_21_crop00_10.jpg",
+     0.9395599365234375
+    ],
+    [
+     "train/ROAD_JUNCTION_ON_THE_RIGHT/NR6_285_crop00_22.jpg",
+     "test/ROAD_JUNCTION_ON_THE_RIGHT/GX010118.MP4_snapshot_05.49.219_crop00_22.jpg",
+     0.9392015933990479
+    ],
+    [
+     "val/CHILDREN_CROSSING/NR6_307_crop00_05.jpg",
+     "test/CHILDREN_CROSSING/NR1_113_crop00_05.jpg",
+     0.9377467632293701
+    ],
+    [
+     "train/KM_POST/GX030274.MP4_snapshot_08.08.961_crop00_11.jpg",
+     "train/KM_POST/GX010273.MP4_snapshot_24.10.573_crop00_11.jpg",
+     0.9356467723846436
+    ],
+    [
+     "train/80_SPEED_LIMIT/NR6_368_crop00_03.jpg",
+     "test/80_SPEED_LIMIT/GX010116.MP4_snapshot_15.04.208_crop00_03.jpg",
+     0.9352442026138306
+    ],
+    [
+     "val/ROAD_JUNCTION_ON_THE_LEFT/NR6_207_crop00_21.jpg",
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010113.MP4_snapshot_13.31.425_crop00_21.jpg",
+     0.933355450630188
+    ],
+    [
+     "train/KEEP_RIGHT/NR6_85_crop00_10.jpg",
+     "val/KEEP_RIGHT/NR5_65_crop00_10.jpg",
+     0.9321675300598145
+    ],
+    [
+     "val/KM_POST/GX010275.MP4_snapshot_06.57.130_crop00_11.jpg",
+     "train/KM_POST/GX020113.MP4_snapshot_11.41.484_crop00_11.jpg",
+     0.931547999382019
+    ],
+    [
+     "test/30_SPEED_LIMIT/NR6_126_crop00_00.jpg",
+     "train/30_SPEED_LIMIT/GX010118.MP4_snapshot_08.24.398_crop00_00.jpg",
+     0.9311004877090454
+    ],
+    [
+     "train/KEEP_RIGHT/NR6_5_crop00_10.jpg",
+     "test/KEEP_RIGHT/NR5_137_crop00_10.jpg",
+     0.9306700229644775
+    ]
+   ]
+  },
+  {
+   "outer_fold": 4,
+   "val_crops": 522,
+   "val_possible_matches": 522,
+   "val_possible_match_pct": 100.0,
+   "test_crops": 606,
+   "test_possible_matches": 597,
+   "test_possible_match_pct": 98.51,
+   "test_flagged_examples": [
+    [
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010112.MP4_snapshot_19.10.601_crop00_21.jpg",
+     "val/ROAD_JUNCTION_ON_THE_LEFT/GX010119.MP4_snapshot_10.51.514_crop00_21.jpg",
+     0.945216953754425
+    ],
+    [
+     "test/SLOW_DOWN/GX010112.MP4_snapshot_03.38.617_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010117.MP4_snapshot_14.15.130_crop00_23.jpg",
+     0.9404188394546509
+    ],
+    [
+     "train/SLOW_DOWN/GX010112.MP4_snapshot_22.39.110_crop00_23.jpg",
+     "train/SLOW_DOWN/NR6_330_crop00_23.jpg",
+     0.9380238056182861
+    ],
+    [
+     "test/ROAD_JUNCTION_ON_THE_LEFT/GX010111.MP4_snapshot_32.59.324_crop00_21.jpg",
+     "val/ROAD_JUNCTION_ON_THE_LEFT/GX010119.MP4_snapshot_14.10.913_crop00_21.jpg",
+     0.9377861022949219
+    ],
+    [
+     "test/CHILDREN_CROSSING/GX010111.MP4_snapshot_20.04.169_crop00_05.jpg",
+     "test/CHILDREN_CROSSING/NR1_113_crop00_05.jpg",
+     0.9368627071380615
+    ],
+    [
+     "train/SLOW_DOWN/GX010112.MP4_snapshot_24.48.793_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010119.MP4_snapshot_02.14.955_crop00_23.jpg",
+     0.9352973699569702
+    ],
+    [
+     "val/ROAD_JUNCTION_ON_THE_RIGHT/GX010111.MP4_snapshot_23.26.331_crop00_22.jpg",
+     "train/ROAD_JUNCTION_ON_THE_RIGHT/GX010119.MP4_snapshot_02.16.522_crop00_22.jpg",
+     0.9313610792160034
+    ],
+    [
+     "train/SLOW_DOWN/GX010112.MP4_snapshot_11.53.179_crop00_23.jpg",
+     "train/SLOW_DOWN/GX010119.MP4_snapshot_02.14.955_crop00_23.jpg",
+     0.9308822154998779
+    ],
+    [
+     "train/ROAD_JUNCTION_ON_THE_LEFT/GX010112.MP4_snapshot_11.19.744_crop00_21.jpg",
+     "test/ROAD_JUNCTION_ON_THE_LEFT/NR6_210_crop00_21.jpg",
+     0.9294812679290771
+    ],
+    [
+     "train/PEDESTRAIN_CR_AREA/GX010111.MP4_snapshot_07.49.025_crop00_18.jpg",
+     "train/PEDESTRAIN_CR_AREA/GX010117.MP4_snapshot_16.25.605_crop00_18.jpg",
+     0.928552508354187
+    ]
+   ]
+  }
+ ]
+}

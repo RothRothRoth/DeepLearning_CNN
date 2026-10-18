@@ -1,0 +1,7 @@
+{
+ "rule": "Phase 2 Stage A (read-only): detector threshold / inference-resolution sweep on VALIDATION photos only.\n\nSelection rule, fixed before looking at any result:\n  among all (imgsz, conf) settings with all-sign precision >= 0.90 on the validation photos, pick the one with the\n  highest end-to-end accuracy on the 26-class validation signs (found AND correctly classified); ties -> fewer\n  false detections, then faster. The chosen setting (and the current default, 1280 / 0.25) is then evaluated ONCE\n  on the test photos for reporting only.\nOutputs go to D:\\DL_phase2\\stage_a (nothing in the project is modified).\n",
+ "choice": {
+  "imgsz": 1600,
+  "conf": 0.3
+ }
+}

@@ -1,0 +1,210 @@
+{
+ "design": "Builds drive-cluster groups and a grouped 5-fold cross-validation split (Phase 3).\n\nWhy: the original split separates source PHOTOS, but many photos are video frames of the same drive (and the\nNR*_*.jpg photos turned out to be renamed frames of the GoPro recordings), so near-identical scenes can end up in\ntrain and test. Here whole DRIVE CLUSTERS are kept together.\n\nGrouping evidence (no photo has EXIF metadata, so only file names and image content are available):\n  GX<chapter><recording>.MP4_snapshot_<min>.<sec>.<ms>  -> GoPro recording (all chapters = one drive)\n  NR<road>_<n>                                          -> road; linked to the recording of a near-identical frame\n  photo_..._<date>_<time>                                -> one phone session per day\nNear-identical = cosine >= 0.96 between ImageNet ResNet-18 features of the whole photos (calibration: GoPro frames\n< 1 s apart have median 0.959; photos from different recordings reach 0.945 at the 99.9th percentile).\nClusters = union of: one recording; one NR road; one phone day; NR road <-> recording of its near-identical frames;\ntwo recordings sharing >= 2 near-identical frames.\n\nFolds: the clusters are assigned to 5 folds by a seeded search. For outer fold k: test = fold k,\nvalidation = fold (k+1) mod 5 (early stopping / best epoch only), train = the other three folds. Every cluster is\ntested exactly once. Constraint: every training set contains all 26 classes.\n\nOutputs (new files only): dataset/splits_grouped/  (cluster table, fold table, per-fold train/val/test CSVs, summary)\nFeatures are cached in D:\\DL_phase3\\features\\ (outside the repository).\n",
+ "threshold": 0.96,
+ "min_shared_frames": 2,
+ "seed": 42,
+ "search_iters": 300000,
+ "n_clusters": 20,
+ "folds": [
+  {
+   "outer_fold": 0,
+   "test_fold": 0,
+   "val_fold": 1,
+   "test_crops": 522,
+   "val_crops": 538,
+   "train_crops": 2010,
+   "test_photos": 436,
+   "val_photos": 432,
+   "train_photos": 1655,
+   "test_clusters": [
+    "REC0106",
+    "REC0113",
+    "REC0118",
+    "REC0217",
+    "REC0234",
+    "REC0239"
+   ],
+   "val_clusters": [
+    "NR2+REC0279",
+    "NR5+REC0281",
+    "REC0119",
+    "REC0131",
+    "REC0226",
+    "REC0238"
+   ],
+   "train_clusters": [
+    "NR1+REC0116+REC0117+REC0271+REC0272+REC0273",
+    "NR6+REC0274+REC0275+REC0276+REC0277",
+    "PHOTO_2025-04-06",
+    "PHOTO_2025-04-08",
+    "REC0107",
+    "REC0109+REC0111+REC0112+REC0114",
+    "REC0110",
+    "REC0115"
+   ],
+   "test_classes": 26,
+   "val_classes": 26,
+   "train_classes": 26
+  },
+  {
+   "outer_fold": 1,
+   "test_fold": 1,
+   "val_fold": 2,
+   "test_crops": 538,
+   "val_crops": 649,
+   "train_crops": 1883,
+   "test_photos": 432,
+   "val_photos": 524,
+   "train_photos": 1567,
+   "test_clusters": [
+    "NR2+REC0279",
+    "NR5+REC0281",
+    "REC0119",
+    "REC0131",
+    "REC0226",
+    "REC0238"
+   ],
+   "val_clusters": [
+    "NR1+REC0116+REC0117+REC0271+REC0272+REC0273",
+    "PHOTO_2025-04-08",
+    "REC0107",
+    "REC0115"
+   ],
+   "train_clusters": [
+    "NR6+REC0274+REC0275+REC0276+REC0277",
+    "PHOTO_2025-04-06",
+    "REC0106",
+    "REC0109+REC0111+REC0112+REC0114",
+    "REC0110",
+    "REC0113",
+    "REC0118",
+    "REC0217",
+    "REC0234",
+    "REC0239"
+   ],
+   "test_classes": 26,
+   "val_classes": 26,
+   "train_classes": 26
+  },
+  {
+   "outer_fold": 2,
+   "test_fold": 2,
+   "val_fold": 3,
+   "test_crops": 649,
+   "val_crops": 755,
+   "train_crops": 1666,
+   "test_photos": 524,
+   "val_photos": 655,
+   "train_photos": 1344,
+   "test_clusters": [
+    "NR1+REC0116+REC0117+REC0271+REC0272+REC0273",
+    "PHOTO_2025-04-08",
+    "REC0107",
+    "REC0115"
+   ],
+   "val_clusters": [
+    "NR6+REC0274+REC0275+REC0276+REC0277"
+   ],
+   "train_clusters": [
+    "NR2+REC0279",
+    "NR5+REC0281",
+    "PHOTO_2025-04-06",
+    "REC0106",
+    "REC0109+REC0111+REC0112+REC0114",
+    "REC0110",
+    "REC0113",
+    "REC0118",
+    "REC0119",
+    "REC0131",
+    "REC0217",
+    "REC0226",
+    "REC0234",
+    "REC0238",
+    "REC0239"
+   ],
+   "test_classes": 26,
+   "val_classes": 26,
+   "train_classes": 26
+  },
+  {
+   "outer_fold": 3,
+   "test_fold": 3,
+   "val_fold": 4,
+   "test_crops": 755,
+   "val_crops": 606,
+   "train_crops": 1709,
+   "test_photos": 655,
+   "val_photos": 476,
+   "train_photos": 1392,
+   "test_clusters": [
+    "NR6+REC0274+REC0275+REC0276+REC0277"
+   ],
+   "val_clusters": [
+    "PHOTO_2025-04-06",
+    "REC0109+REC0111+REC0112+REC0114",
+    "REC0110"
+   ],
+   "train_clusters": [
+    "NR1+REC0116+REC0117+REC0271+REC0272+REC0273",
+    "NR2+REC0279",
+    "NR5+REC0281",
+    "PHOTO_2025-04-08",
+    "REC0106",
+    "REC0107",
+    "REC0113",
+    "REC0115",
+    "REC0118",
+    "REC0119",
+    "REC0131",
+    "REC0217",
+    "REC0226",
+    "REC0234",
+    "REC0238",
+    "REC0239"
+   ],
+   "test_classes": 26,
+   "val_classes": 26,
+   "train_classes": 26
+  },
+  {
+   "outer_fold": 4,
+   "test_fold": 4,
+   "val_fold": 0,
+   "test_crops": 606,
+   "val_crops": 522,
+   "train_crops": 1942,
+   "test_photos": 476,
+   "val_photos": 436,
+   "train_photos": 1611,
+   "test_clusters": [
+    "PHOTO_2025-04-06",
+    "REC0109+REC0111+REC0112+REC0114",
+    "REC0110"
+   ],
+   "val_clusters": [
+    "REC0106",
+    "REC0113",
+    "REC0118",
+    "REC0217",
+    "REC0234",
+    "REC0239"
+   ],
+   "train_clusters": [
+    "NR1+REC0116+REC0117+REC0271+REC0272+REC0273",
+    "NR2+REC0279",
+    "NR5+REC0281",
+    "NR6+REC0274+REC0275+REC0276+REC0277",
+    "PHOTO_2025-04-08",
+    "REC0107",
+    "REC0115",
+    "REC0119",
+    "REC0131",
+    "REC0226",
+    "REC0238"
+   ],
+   "test_classes": 26,
+   "val_classes": 26,
+   "train_classes": 26
+  }
+ ]
+}

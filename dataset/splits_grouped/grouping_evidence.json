@@ -1,0 +1,527 @@
+[
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_101.jpg",
+  "b": "GX010117.MP4_snapshot_05.55.630.jpg",
+  "cosine": 0.9617
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_104.jpg",
+  "b": "GX010272.MP4_snapshot_03.44.013.JPG",
+  "cosine": 0.9622
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_108.jpg",
+  "b": "GX010272.MP4_snapshot_09.34.818.JPG",
+  "cosine": 0.9882
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_120.jpg",
+  "b": "GX010272.MP4_snapshot_18.18.803.JPG",
+  "cosine": 0.965
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_171.jpg",
+  "b": "GX010272.MP4_snapshot_03.44.013.JPG",
+  "cosine": 0.9642
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_175.jpg",
+  "b": "GX010272.MP4_snapshot_09.34.818.JPG",
+  "cosine": 0.9607
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_20.jpg",
+  "b": "GX010271.MP4_snapshot_07.14.532.JPG",
+  "cosine": 0.9653
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_200.jpg",
+  "b": "GX020273.MP4_snapshot_09.57.686.JPG",
+  "cosine": 0.9627
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_30.jpg",
+  "b": "GX010271.MP4_snapshot_09.51.667.JPG",
+  "cosine": 0.9689
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_62.jpg",
+  "b": "GX010271.MP4_snapshot_17.32.180.JPG",
+  "cosine": 0.9856
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_64.jpg",
+  "b": "GX010271.MP4_snapshot_17.55.907.JPG",
+  "cosine": 0.9744
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_66.jpg",
+  "b": "GX010117.MP4_snapshot_05.55.630.jpg",
+  "cosine": 0.9617
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_68.jpg",
+  "b": "GX010271.MP4_snapshot_17.32.180.JPG",
+  "cosine": 0.9633
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_70.jpg",
+  "b": "GX020273.MP4_snapshot_07.11.678.JPG",
+  "cosine": 0.9609
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_72.jpg",
+  "b": "GX010271.MP4_snapshot_17.32.180.JPG",
+  "cosine": 0.9615
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_75.jpg",
+  "b": "GX010117.MP4_snapshot_04.53.313.jpg",
+  "cosine": 0.9606
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_85.jpg",
+  "b": "GX010271.MP4_snapshot_30.27.398.JPG",
+  "cosine": 0.9665
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_88.jpg",
+  "b": "GX010272.MP4_snapshot_00.52.637.JPG",
+  "cosine": 0.9604
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_89.jpg",
+  "b": "GX010271.MP4_snapshot_30.27.398.JPG",
+  "cosine": 0.9704
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR1_99.jpg",
+  "b": "GX010117.MP4_snapshot_02.11.128.JPG",
+  "cosine": 0.9625
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR2_22.jpg",
+  "b": "GX010279.MP4_snapshot_08.00.908.JPG",
+  "cosine": 0.9668
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR2_53.jpg",
+  "b": "GX010279.MP4_snapshot_20.20.547.JPG",
+  "cosine": 0.9718
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR2_54.jpg",
+  "b": "GX010279.MP4_snapshot_21.30.698.JPG",
+  "cosine": 0.9607
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR2_66.jpg",
+  "b": "GX010279.MP4_snapshot_22.47.669.JPG",
+  "cosine": 0.9609
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR2_75.jpg",
+  "b": "GX010279.MP4_snapshot_24.52.196.JPG",
+  "cosine": 0.9644
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR2_76.jpg",
+  "b": "GX010279.MP4_snapshot_29.29.589.JPG",
+  "cosine": 0.964
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_101.jpg",
+  "b": "GX010281.MP4_snapshot_21.41.119.JPG",
+  "cosine": 0.9833
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_125.jpg",
+  "b": "GX010281.MP4_snapshot_26.40.515.JPG",
+  "cosine": 0.9655
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_19.jpg",
+  "b": "GX010281.MP4_snapshot_04.06.623.JPG",
+  "cosine": 0.9756
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_60.jpg",
+  "b": "GX010281.MP4_snapshot_13.05.369.JPG",
+  "cosine": 0.9628
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_64.jpg",
+  "b": "GX010281.MP4_snapshot_14.52.648.JPG",
+  "cosine": 0.9616
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_88.jpg",
+  "b": "GX010281.MP4_snapshot_19.05.647.JPG",
+  "cosine": 0.9601
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR5_89.jpg",
+  "b": "GX010281.MP4_snapshot_19.04.815.JPG",
+  "cosine": 0.9612
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_118.jpg",
+  "b": "GX020274.MP4_snapshot_11.56.093.JPG",
+  "cosine": 0.9697
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_122.jpg",
+  "b": "GX020274.MP4_snapshot_22.41.410.JPG",
+  "cosine": 0.9666
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_124.jpg",
+  "b": "GX030274.MP4_snapshot_08.08.961.JPG",
+  "cosine": 0.9646
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_136.jpg",
+  "b": "GX020274.MP4_snapshot_11.55.189.JPG",
+  "cosine": 0.9636
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_139.jpg",
+  "b": "GX030274.MP4_snapshot_02.54.302.JPG",
+  "cosine": 0.9622
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_189.jpg",
+  "b": "GX010275.MP4_snapshot_30.59.287.JPG",
+  "cosine": 0.9651
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_205.jpg",
+  "b": "GX010275.MP4_snapshot_10.59.807.JPG",
+  "cosine": 0.9662
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_226.jpg",
+  "b": "GX010275.MP4_snapshot_24.15.441.JPG",
+  "cosine": 0.9678
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_230.jpg",
+  "b": "GX010275.MP4_snapshot_26.34.748.JPG",
+  "cosine": 0.9647
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_236.jpg",
+  "b": "GX010275.MP4_snapshot_30.59.287.JPG",
+  "cosine": 0.9617
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_238.jpg",
+  "b": "GX010275.MP4_snapshot_22.25.437.JPG",
+  "cosine": 0.9649
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_240.jpg",
+  "b": "GX010275.MP4_snapshot_29.51.229.JPG",
+  "cosine": 0.9753
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_283.jpg",
+  "b": "GX010276.MP4_snapshot_01.42.742.JPG",
+  "cosine": 0.9617
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_292.jpg",
+  "b": "GX020275.MP4_snapshot_06.04.000.JPG",
+  "cosine": 0.9619
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_302.jpg",
+  "b": "GX010275.MP4_snapshot_30.59.287.JPG",
+  "cosine": 0.9606
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_311.jpg",
+  "b": "GX010276.MP4_snapshot_20.31.115.JPG",
+  "cosine": 0.9609
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_313.jpg",
+  "b": "GX010276.MP4_snapshot_16.21.860.JPG",
+  "cosine": 0.9679
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_321.jpg",
+  "b": "GX010276.MP4_snapshot_20.31.115.JPG",
+  "cosine": 0.9616
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_324.jpg",
+  "b": "GX010276.MP4_snapshot_20.31.115.JPG",
+  "cosine": 0.962
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_340.jpg",
+  "b": "GX010277.MP4_snapshot_25.22.951.JPG",
+  "cosine": 0.9635
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_350.jpg",
+  "b": "GX010277.MP4_snapshot_07.51.102.JPG",
+  "cosine": 0.9634
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_363.jpg",
+  "b": "GX010277.MP4_snapshot_16.47.593.JPG",
+  "cosine": 0.9612
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_365.jpg",
+  "b": "GX010277.MP4_snapshot_18.27.677.JPG",
+  "cosine": 0.9611
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_366.jpg",
+  "b": "GX010277.MP4_snapshot_16.47.593.JPG",
+  "cosine": 0.9745
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_367.jpg",
+  "b": "GX010277.MP4_snapshot_25.22.951.JPG",
+  "cosine": 0.9695
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_369.jpg",
+  "b": "GX010277.MP4_snapshot_19.16.973.JPG",
+  "cosine": 0.9653
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_373.jpg",
+  "b": "GX010277.MP4_snapshot_19.16.353.JPG",
+  "cosine": 0.9647
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_377.jpg",
+  "b": "GX010277.MP4_snapshot_21.38.685.JPG",
+  "cosine": 0.9662
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_383.jpg",
+  "b": "GX010277.MP4_snapshot_23.45.482.JPG",
+  "cosine": 0.971
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_384.jpg",
+  "b": "GX010277.MP4_snapshot_19.16.353.JPG",
+  "cosine": 0.9609
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_395.jpg",
+  "b": "GX010277.MP4_snapshot_19.16.973.JPG",
+  "cosine": 0.9601
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_398.jpg",
+  "b": "GX010277.MP4_snapshot_31.39.848.JPG",
+  "cosine": 0.9693
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_399.jpg",
+  "b": "GX010277.MP4_snapshot_25.22.951.JPG",
+  "cosine": 0.9614
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_400.jpg",
+  "b": "GX010277.MP4_snapshot_30.43.836.JPG",
+  "cosine": 0.9757
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_401.jpg",
+  "b": "GX010277.MP4_snapshot_31.41.114.JPG",
+  "cosine": 0.9686
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_404.jpg",
+  "b": "GX010277.MP4_snapshot_38.37.548.JPG",
+  "cosine": 0.968
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_411.jpg",
+  "b": "GX010277.MP4_snapshot_25.22.951.JPG",
+  "cosine": 0.9682
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_439.jpg",
+  "b": "GX030274.MP4_snapshot_02.54.723.JPG",
+  "cosine": 0.9757
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_440.jpg",
+  "b": "GX020274.MP4_snapshot_11.56.093.JPG",
+  "cosine": 0.9675
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_444.jpg",
+  "b": "GX030274.MP4_snapshot_08.08.961.JPG",
+  "cosine": 0.9606
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_445.jpg",
+  "b": "GX030274.MP4_snapshot_08.08.961.JPG",
+  "cosine": 0.9823
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_446.jpg",
+  "b": "GX030274.MP4_snapshot_08.58.925.JPG",
+  "cosine": 0.966
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_71.jpg",
+  "b": "GX010274.MP4_snapshot_27.02.276.JPG",
+  "cosine": 0.9631
+ },
+ {
+  "type": "NR photo ~ GoPro frame",
+  "a": "NR6_92.jpg",
+  "b": "GX020274.MP4_snapshot_00.36.762.JPG",
+  "cosine": 0.9842
+ },
+ {
+  "type": "recordings share 2 near-identical frames",
+  "a": "REC0109",
+  "b": "REC0111",
+  "example": [
+   "GX010109.MP4_snapshot_00.24.905.jpg",
+   "GX010111.MP4_snapshot_34.09.978.jpg"
+  ]
+ },
+ {
+  "type": "recordings share 2 near-identical frames",
+  "a": "REC0111",
+  "b": "REC0114",
+  "example": [
+   "GX010111.MP4_snapshot_21.12.234.jpg",
+   "GX010114.MP4_snapshot_10.15.987.jpg"
+  ]
+ },
+ {
+  "type": "recordings share 2 near-identical frames",
+  "a": "REC0111",
+  "b": "REC0112",
+  "example": [
+   "GX010111.MP4_snapshot_23.26.331.jpg",
+   "GX010112.MP4_snapshot_20.31.187.jpg"
+  ]
+ },
+ {
+  "type": "recordings share 12 near-identical frames",
+  "a": "REC0116",
+  "b": "REC0117",
+  "example": [
+   "GX010116.MP4_snapshot_15.28.101.JPG",
+   "GX010117.MP4_snapshot_05.47.748.jpg"
+  ]
+ },
+ {
+  "type": "recordings share 10 near-identical frames",
+  "a": "REC0117",
+  "b": "REC0272",
+  "example": [
+   "GX010117.MP4_snapshot_02.11.128.JPG",
+   "GX010272.MP4_snapshot_00.52.090.JPG"
+  ]
+ },
+ {
+  "type": "recordings share 7 near-identical frames",
+  "a": "REC0275",
+  "b": "REC0276",
+  "example": [
+   "GX010275.MP4_snapshot_22.25.437.JPG",
+   "GX010276.MP4_snapshot_01.42.742.JPG"
+  ]
+ },
+ {
+  "type": "recordings share 7 near-identical frames",
+  "a": "REC0274",
+  "b": "REC0277",
+  "example": [
+   "GX010277.MP4_snapshot_24.31.917.JPG",
+   "GX020274.MP4_snapshot_11.56.093.JPG"
+  ]
+ }
+]

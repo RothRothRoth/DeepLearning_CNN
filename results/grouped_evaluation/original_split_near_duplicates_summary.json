@@ -1,0 +1,23 @@
+{
+ "definition": "Read-only analysis of the ORIGINAL random split (dataset/splits): temporal near-duplicates of test crops.\n\nDefinition (time-based, from file names only):\n  A test crop counts as a \"near-duplicate\" if it comes from a GoPro video frame\n  (GX<chapter><recording>.MP4_snapshot_<min>.<sec>.<ms>) and the TRAINING split contains a crop of the SAME CLASS\n  from the SAME video file whose frame time is at most --gap seconds away (default 2 s).\n  Such a pair most likely shows the same physical sign a moment earlier or later. This does not prove that the\n  model memorised it; it only means the two images are not independent.\nNR*_*.jpg and photo_* crops have no frame time in their names, so they are reported as \"timing unknown\".",
+ "test_crops": 463,
+ "test_crops_by_source": {
+  "gopro_video_frame": 307,
+  "nr_photo": 139,
+  "phone_photo": 17
+ },
+ "near_duplicates": 84,
+ "near_duplicate_pct_of_all_test_crops": 18.14,
+ "within_gap_counts": {
+  "1s": 65,
+  "2s": 84,
+  "5s": 92,
+  "10s": 113
+ },
+ "final_model_accuracy": {
+  "all_test_crops": 98.7,
+  "near_duplicates": 98.81,
+  "excluding_near_duplicates": 98.68,
+  "n_excluding_near_duplicates": 379
+ }
+}
