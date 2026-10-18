@@ -20,7 +20,7 @@ Three approaches of increasing transfer-learning strength are compared on exactl
 **Follow-up work** (kept separate from the main comparison above, because each uses a different evaluation):
 
 - **Grouped evaluation by drive (Section 9):** the final configuration re-trained and tested with grouped 5-fold cross-validation × 3 seeds, so every test crop comes from a drive the model never saw. Pooled accuracy **98.31% ± 0.20**, macro F1 **97.24% ± 0.68**. This is a different protocol from the 98.70% above, not a before/after comparison.
-- **Extension: YOLO sign detector + pipeline (Section 10):** a separate YOLOv8 model finds signs in full street photos, and the final classifier names each detected sign. 445 of 463 test signs (96.11%) are both found and correctly classified.
+- **Extension: YOLO sign detector + pipeline (Section 10):** a separate YOLOv8 model finds signs in full street photos, and the final classifier names each detected sign. 445 of 463 test signs (96.11%) are both found and correctly classified. A retrained detector (Section 10.1) also handles close-up photos (simulated close-ups from test photos: 27.7% → 96.9% found and named correctly) and stays about equal on normal photos (444 of 463, 95.90%).
 
 ## 2. Problem Statement
 
@@ -311,6 +311,28 @@ These are **detection and pipeline results**, a different task from the classifi
 - **Limitations:** single run (seed 42). The classifier still knows only 26 classes, so a detected sign of another type (e.g. STOP) is given the closest of the 26 labels. The detector was evaluated on the original photo split, so the near-duplicate caveat of Section 9.1 applies here too.
 - **Web app:** `app.py` (Gradio, runs locally) has a "Classify a Cropped Sign" tab and a "Detect All Signs in a Street Photo" tab that runs this pipeline.
 
+### 10.1 Retrained detector for close-up photos
+
+**Problem:** the first detector only saw dashcam photos, where a sign is usually under 1% of the frame. On close-ups (a sign filling 30-70% of the photo) it missed most signs or boxed only the inside of a sign, so the classifier saw half a sign and gave a wrong label.
+
+**Fix (no change to the classifier or the app code):** the same YOLO dataset plus two kinds of extra training images, built from the **train and validation photos only**; the test photos are unchanged:
+- **2,000 zoomed close-ups** (378 for validation): a crop around one annotated sign so that it fills 25-70% of the frame, with the boxes adjusted.
+- **1,500 composites** (300 for validation): 1-4 annotated sign crops pasted large onto plain, coloured or gradient backgrounds.
+
+Training started from the first detector's weights: 30 epochs at 1280 px, seed 42, batch size 4, on the same RTX 4060 Laptop GPU. The run was resumed once from its epoch-3 checkpoint after running out of system memory (with 2 instead of 4 data-loading workers). Code: [`scripts/train_sign_detector_closeup.py`](scripts/train_sign_detector_closeup.py); results: [`results/sign_detector_closeup/`](results/sign_detector_closeup/) ([`closeup_detector_metrics.json`](results/sign_detector_closeup/closeup_detector_metrics.json)).
+
+**Test results, first vs. retrained detector** (same unchanged classifier, detector threshold 0.25, test split only):
+
+| Test images | Signs | Found: first → retrained | Found **and** correctly named: first → retrained | Extra boxes |
+|---|---:|---:|---:|---:|
+| Close-ups made from test photos | 191 | 28.8% → 99.0% | 27.7% → **96.9%** | 60 → 67 |
+| Test sign crops pasted on plain backgrounds | 447 | 26.2% → 100% | 26.0% → **99.1%** | 58 → 10 |
+| Normal test photos (Section 10) | 463 | 97.0% → 97.2% (450) | 96.1% → 95.9% (444) | 72 → 80 |
+
+On the normal test photos the retrained detector has precision 93.83%, recall 96.55%, mAP@50 0.985 and mAP@50-95 0.875 (first detector: 95.57%, 96.34%, 0.978, 0.873), so the two are about equal there.
+
+- **Limitations:** the close-up test images are **simulated** from test photos (zoomed crops and pasted crops), not real phone photos. Single run (seed 42). Signs outside the 26 classes still get the closest of the 26 labels. The threshold check of Section 10 was done for the first detector only.
+
 ## 11. Limitations
 
 - **Small, imbalanced dataset:** 3,070 crops in total, and some classes have fewer than 40 crops (as few as 29). The test set contains only 3–10 crops for several classes, so their per-class scores are unreliable.
@@ -319,7 +341,7 @@ These are **detection and pipeline results**, a different task from the classifi
 - **Near-duplicate video frames in the original split:** 18.1% of the original test crops have a same-class training frame from the same video at most 2 s away (Section 9.1).
 - **Independence by location is not guaranteed:** even in the grouped evaluation, the same physical sign can appear on different trips (Section 9.5).
 - **Look-alike diamond signs:** in the grouped evaluation, Cross Road is the weakest class (F1 0.81), mostly confused with Priority Road (Section 9.4).
-- **Classification of given crops only:** the models classify already-cropped signs. *Update:* the YOLO extension in Section 10 adds sign detection in full street photos, evaluated separately.
+- **Classification of given crops only:** the models classify already-cropped signs. *Update:* the YOLO extension in Section 10 adds sign detection in full street photos, evaluated separately; Section 10.1 extends it to close-ups, tested on simulated close-ups only.
 - **Limited tuning:** only learning rate and weight decay were tuned, over a 2 × 2 grid.
 - **Probable annotation errors:** three of the final model's six misclassified test images appear to be annotation errors based on visual inspection and comparison with the original dataset annotations. Only the misclassified test images were inspected, so annotation quality across the rest of the dataset was not assessed.
 - **Visually similar classes:** several classes differ only in small details (left vs. right junction and bend signs, the 30 / 40 / 60 / 80 speed limits), which makes them inherently harder to separate.
@@ -331,7 +353,7 @@ These are **detection and pipeline results**, a different task from the classifi
 - **Review the annotations.** Report the three probable annotation errors to the dataset author, and check the training data for similar label noise.
 - **Help the rare classes:** collect more images of them, or try class-balanced sampling or a class-weighted loss.
 - **Stabilise fine-tuning:** try a lower learning rate or a learning-rate warm-up for the pretrained layers, given the early validation fluctuations seen in the curves.
-- **Detect signs in full street scenes.** The raw dataset also includes YOLO-format label files, so an object detector could be trained to find and classify signs end to end. *Done as an extension (Section 10); next steps there are a grouped evaluation of the detector, more DIRECTION-board examples, and adding the unannotated signs to the labels.*
+- **Detect signs in full street scenes.** The raw dataset also includes YOLO-format label files, so an object detector could be trained to find and classify signs end to end. *Done as an extension (Section 10, close-ups in 10.1); next steps there are a grouped evaluation of the detector, a test on real phone close-up photos, more DIRECTION-board examples, and adding the unannotated signs to the labels.*
 - **Test robustness** on small, blurred and occluded signs, which caused most of the final model's genuine errors, and compare other architectures (e.g. EfficientNet or a Vision Transformer).
 
 ## 12. How to Run
@@ -451,11 +473,19 @@ python scripts/analyse_original_split_near_duplicates.py
 python scripts/train_sign_detector.py --batch 6
 ```
 
-- Local web app (Gradio), serving http://127.0.0.1:7860 only. Needs the extra package `gradio` (version 6.30.0 was used). The `--detector` options are only needed for the street-photo tab:
+- Retrained close-up detector (Section 10.1), after the first detector. Add `--resume --batch 4 --workers 2` to continue an interrupted run:
 
 ```bash
-python app.py --checkpoint path/to/resnet18_finetuned_tuned_best.pt --detector path/to/sign_detector_best.pt --detector-metrics results/sign_detector/detector_and_pipeline_metrics.json
+python scripts/train_sign_detector_closeup.py --batch 4
 ```
+
+- Local web app (Gradio), serving http://127.0.0.1:7860 only. Needs the extra package `gradio` (version 6.30.0 was used). The `--detector` options are only needed for the street-photo tab. With the retrained detector:
+
+```bash
+python app.py --checkpoint path/to/resnet18_finetuned_tuned_best.pt --detector path/to/sign_detector_closeup_best.pt --detector-metrics results/sign_detector_closeup/detector_and_pipeline_metrics.json
+```
+
+With the first detector, use `--detector path/to/sign_detector_best.pt --detector-metrics results/sign_detector/detector_and_pipeline_metrics.json`.
 
 ## 13. Repository Structure
 
@@ -492,7 +522,8 @@ DeepLearning_CNN/
 ├── results/
 │   ├── final_model/                     # final model error analysis (misclassified images)
 │   ├── grouped_evaluation/              # Section 9: 15 runs, summary tables, figures, leakage check
-│   └── sign_detector/                   # Section 10: detector and pipeline metrics, curves, threshold check
+│   ├── sign_detector/                   # Section 10: detector and pipeline metrics, curves, threshold check
+│   └── sign_detector_closeup/           # Section 10.1: retrained close-up detector, first vs. retrained
 └── docs/  slides/
 ```
 
