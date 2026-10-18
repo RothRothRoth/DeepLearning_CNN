@@ -15,6 +15,11 @@ Optional second tab, "Detect All Signs in a Street Photo": a 1-class YOLO detect
 finds every traffic sign; each box is cropped from the full-resolution photo and classified by the SAME ResNet-18.
 The detector's single class ("Traffic Sign") is only a detection label; the sign type always comes from ResNet-18.
 
+With a detector, two more tabs: "Live Camera" (the same pipeline on webcam frames) and "Sign Map" (phone photos are
+pinned on an OpenStreetMap map at their EXIF GPS position; live-camera signs at the browser's location).
+Predictions below the cut-off in results/unknown_sign/ (scripts/unknown_sign_threshold.py) are shown as
+"Unknown sign"; --no-unknown turns this off.
+
 Usage (local, serves http://127.0.0.1:7860 only; Colab: see notebooks/08_web_demo.ipynb):
     python app.py --checkpoint path/to/resnet18_finetuned_tuned_best.pt
 Optional: --processed-dir path/to/dataset/processed, --port N, --share (temporary public link),
@@ -129,6 +134,66 @@ class SignDetector:
         boxes = self.model.predict(image, imgsz=self.imgsz, conf=conf, device=self.device, verbose=False)[0].boxes
         dets = [(tuple(float(v) for v in b), float(c)) for b, c in zip(boxes.xyxy.cpu(), boxes.conf.cpu())]
         return sorted(dets, key=lambda d: (d[0][0], d[0][1]))
+
+
+UNKNOWN_RULE_DIR = PROJECT_ROOT / "results" / "unknown_sign"
+
+
+def load_unknown_rule(rule_dir=UNKNOWN_RULE_DIR):
+    """"Unknown sign" cut-off chosen by scripts/unknown_sign_threshold.py, with its one-time test result.
+
+    Below this top-1 confidence a prediction is shown as "Unknown sign". None if the result files are missing."""
+    choice, test = Path(rule_dir) / "threshold.json", Path(rule_dir) / "test_once.json"
+    if not choice.is_file():
+        return None
+    rule = {"threshold": float(json.loads(choice.read_text(encoding="utf-8"))["threshold"]), "test": None}
+    if test.is_file():
+        rule["test"] = json.loads(test.read_text(encoding="utf-8"))["test"]
+    return rule
+
+
+def photo_gps(path):
+    """(latitude, longitude) from a photo's EXIF GPS tags (phone photos with location on), or None."""
+    try:
+        gps = Image.open(path).getexif().get_ifd(0x8825)
+        if 2 not in gps or 4 not in gps:
+            return None
+
+        def degrees(value, ref):
+            d = float(value[0]) + float(value[1]) / 60 + float(value[2]) / 3600
+            return -d if str(ref).upper() in ("S", "W") else d
+
+        lat, lon = degrees(gps[2], gps.get(1, "N")), degrees(gps[4], gps.get(3, "E"))
+    except Exception:  # no / unreadable EXIF
+        return None
+    if abs(lat) > 90 or abs(lon) > 180 or (lat == 0 and lon == 0):
+        return None
+    return lat, lon
+
+
+def _map_html(sightings):
+    """OpenStreetMap (Leaflet) map with one pin per sighting, inside a sandboxed iframe. Needs internet."""
+    if not sightings:
+        return ('<div class="tsr-empty" style="min-height:300px"><div><strong>No signs on the map yet</strong></div>'
+                '<div style="margin-top:6px">Upload phone photos with location (GPS) below, or pin the live camera '
+                'signs from the <strong>Live Camera</strong> tab.</div></div>')
+    points = [{"lat": s["lat"], "lon": s["lon"],
+               "html": f'<b>{html.escape(", ".join(s["signs"]) or "no sign recognised")}</b><br>'
+                       f'{html.escape(s["source"])}<br>{html.escape(s["where"])}'} for s in sightings]
+    doc = ('<!doctype html><html><head><meta charset="utf-8">'
+           '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'
+           '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>'
+           '<style>html,body,#m{height:100%;margin:0;font-family:system-ui,sans-serif}</style></head>'
+           '<body><div id="m"></div><script>'
+           f'const pts={json.dumps(points)};const m=L.map("m");'
+           'L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",'
+           '{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(m);'
+           'const g=L.featureGroup(pts.map(p=>L.marker([p.lat,p.lon]).bindPopup(p.html))).addTo(m);'
+           'm.fitBounds(g.getBounds().pad(0.4),{maxZoom:17});'
+           '</script></body></html>')
+    return (f'<iframe srcdoc="{html.escape(doc, quote=True)}" sandbox="allow-scripts" '
+            'style="width:100%;height:460px;border:1px solid #1f2a44;border-radius:10px" '
+            'title="Map of recognised signs"></iframe>')
 
 
 def load_detector_metrics(path):
@@ -439,17 +504,39 @@ EMPTY_RESULT = ('<div class="tsr-empty"><div><strong>No prediction yet</strong><
                 'then press <strong>Classify</strong>.</div></div>')
 
 
-def _result_html(top3, case=None, heading="Predicted class"):
+def _unknown_note(unknown):
+    """One sentence on the "Unknown sign" rule and its measured test result."""
+    t = unknown["threshold"]
+    out = (f'Predictions below {t:.0%} confidence are shown as <strong>Unknown sign</strong> (cut-off chosen on '
+           'validation data with signs outside the 26 classes).')
+    if unknown.get("test"):
+        r = unknown["test"]
+        out += (f' On the test set, evaluated once, it flagged {round(r["unknown_flagged"] * r["unknown_signs"])} of '
+                f'{r["unknown_signs"]} signs outside the 26 classes (e.g. STOP, Parking), and wrongly flagged '
+                f'{_pct(1 - r["known_kept"])} of the {r["known_signs"]} signs of the 26 classes.')
+    return out
+
+
+def _result_html(top3, case=None, heading="Predicted class", unknown=None):
     name, conf = top3[0]
+    is_unknown = unknown is not None and conf < unknown["threshold"]
     out = (f'<div class="tsr-result-label">{html.escape(heading)}</div>'
-           f'<div class="tsr-pred">{html.escape(pretty(name))}</div>'
-           f'<div class="tsr-code">class code {html.escape(name)}</div>'
+           f'<div class="tsr-pred">{"Unknown sign" if is_unknown else html.escape(pretty(name))}</div>'
+           + (f'<div class="tsr-code">best guess among the 26 classes: {html.escape(pretty(name))}</div>' if is_unknown
+              else f'<div class="tsr-code">class code {html.escape(name)}</div>') +
            f'<div class="tsr-conf"><span class="tsr-conf-value">{_pct(conf)}</span>'
            '<span class="tsr-conf-label">confidence</span></div>')
-    if conf < LOW_CONFIDENCE:
+    if is_unknown:
+        out += (f'<div class="tsr-alert tsr-alert-warn"><strong>Unknown sign.</strong> Confidence is below the '
+                f'{unknown["threshold"]:.0%} cut-off, so this is probably not one of the 26 supported signs, or the '
+                'image is unclear or not a tight crop.</div>')
+    elif conf < LOW_CONFIDENCE:
         out += ('<div class="tsr-alert tsr-alert-warn"><strong>Low confidence.</strong> The image may be unclear, '
                 'not a tight crop, or not one of the 26 supported classes. Treat this prediction with caution.</div>')
-    if case is not None:
+    if case is not None and is_unknown:
+        out += (f'<div class="tsr-alert tsr-alert-bad"><strong>Flagged as unknown.</strong> Test-set ground truth: '
+                f'{html.escape(pretty(case["true_label"]))} (one of the 26 classes).</div>')
+    elif case is not None:
         # Ground truth comes from the saved test labels; the comparison uses the live prediction.
         truth = html.escape(pretty(case["true_label"]))
         if name == case["true_label"]:
@@ -468,11 +555,12 @@ def _result_html(top3, case=None, heading="Predicted class"):
                 f'<div class="tsr-bar-fill" style="width:{max(100 * p, 0.5):.2f}%"></div></div></div>'
                 f'<span class="tsr-bar-pct">{_pct(p)}</span></div>')
     out += ('</div><p class="tsr-fine">Confidence is the model\'s softmax probability, not a guarantee that the '
-            'prediction is correct. The model always chooses one of its 26 classes; it has no "unknown" class.</p>')
+            'prediction is correct. The model itself always chooses one of its 26 classes. '
+            + (_unknown_note(unknown) if unknown else 'There is no "unknown" rule in this run.') + '</p>')
     return out
 
 
-def _details_html(classifier, verification, metrics):
+def _details_html(classifier, verification, metrics, unknown=None):
     cfg = (f"Config {metrics['config']} (learning rate {metrics['lr']:g}, weight decay {metrics['wd']:g})"
            if metrics else "not available")
     test_n = f"{metrics['num_test']} images" if metrics else "not available"
@@ -497,8 +585,10 @@ def _details_html(classifier, verification, metrics):
         '<h4>Limitations</h4><ul>'
         '<li>Only the 26 selected classes below are supported. Other signs (for example STOP) are not a class, '
         'so the model maps them to the closest supported class.</li>'
-        '<li>There is no unknown-class detector: unrelated images still receive a prediction, '
-        'sometimes with high confidence.</li>'
+        + (f'<li>Unknown signs: {_unknown_note(unknown)} Look-alike signs (e.g. No Stopping vs. No Parking) can '
+           'still get a confident wrong label.</li>' if unknown else
+           '<li>There is no unknown-class detector: unrelated images still receive a prediction, '
+           'sometimes with high confidence.</li>') +
         '<li>Small, blurred, occluded or visually similar signs can be misclassified; the final model made '
         '6 errors on the test set, some with confidence above 95%.</li>'
         '<li>The model was trained on tight crops of one sign, not full street scenes.</li>'
@@ -513,16 +603,18 @@ EMPTY_DETECTION = ('<div class="tsr-empty" style="min-height:120px"><div><strong
                    '<strong>Detect &amp; Classify</strong>.</div></div>')
 
 
-def _detection_intro_html(detector, detector_metrics, detector_error):
+def _detection_intro_html(detector, detector_metrics, detector_error, unknown=None):
     if detector is None:
         return ('<div class="tsr-alert tsr-alert-warn"><strong>Detector not loaded.</strong> '
                 f'{html.escape(detector_error or "Start the app with --detector path/to/sign_detector_best.pt.")} '
                 'The cropped-sign classifier in the first tab still works.</div>')
     out = ('<div class="tsr-alert tsr-alert-warn" style="margin-top:4px"><strong>Two models, two jobs.</strong> '
            'A YOLO detector finds every traffic sign (its only class is "Traffic Sign"); the ResNet-18 classifier '
-           'then names each crop as one of its <strong>26 supported classes</strong>. Signs outside those classes '
-           '(for example STOP) still receive the closest of the 26 labels, sometimes with high confidence. '
-           'Low classifier confidence is a hint to check the box, not proof that the sign is unknown.</div>')
+           'then names each crop as one of its <strong>26 supported classes</strong>. '
+           + (_unknown_note(unknown) + ' Look-alike signs can still get a confident wrong label.' if unknown else
+              'Signs outside those classes (for example STOP) still receive the closest of the 26 labels, sometimes '
+              'with high confidence. Low classifier confidence is a hint to check the box, not proof that the sign '
+              'is unknown.') + '</div>')
     if detector_metrics:
         d, e = detector_metrics["det"], detector_metrics["e2e"]
         out += (f'<p class="tsr-note">Evaluated once on {e["test_photos"]} held-out test photos (single run): '
@@ -542,13 +634,22 @@ def _label_font(size):
     return ImageFont.load_default(size=size)
 
 
+GEOLOCATION_JS = """() => new Promise((resolve) => {
+  if (!navigator.geolocation) { resolve([null, null]); return; }
+  navigator.geolocation.getCurrentPosition(
+    (p) => resolve([p.coords.latitude, p.coords.longitude]),
+    () => resolve([null, null]), {enableHighAccuracy: true, timeout: 15000, maximumAge: 0});
+})"""
+
+
 def build_demo(classifier, verification, metrics=None, examples=None, detector=None, detector_metrics=None,
-               det_examples=None, detector_error=None):
+               det_examples=None, detector_error=None, unknown=None):
     """Builds the Gradio interface (gradio is imported here, so the model code can be used without it).
 
     `examples` is the list returned by example_images(); plain image paths are also accepted.
-    `detector` (a SignDetector) enables the "Detect All Signs in a Street Photo" tab; `det_examples` are
-    test-split street photos from detection_examples().
+    `detector` (a SignDetector) enables the "Detect All Signs in a Street Photo", "Live Camera" and "Sign Map" tabs;
+    `det_examples` are test-split street photos from detection_examples().
+    `unknown` (from load_unknown_rule()) shows predictions below its confidence cut-off as "Unknown sign".
     """
     import gradio as gr
 
@@ -614,7 +715,8 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
         if image is None:
             return ('<div class="tsr-alert tsr-alert-warn">Please upload an image (or pick an example) first.</div>'
                     + EMPTY_RESULT)
-        return _result_html(classifier.top_k(image, k=3), case if case and case.get("true_label") else None)
+        return _result_html(classifier.top_k(image, k=3), case if case and case.get("true_label") else None,
+                            unknown=unknown)
 
     def pick(items):
         def handler(evt: gr.SelectData):
@@ -634,7 +736,8 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
             return gr.HTML(value="", visible=False)
         scene = Image.open(case["scene"])
         body = _result_html(classifier.top_k(scene, k=3), case,
-                            heading=f"Whole uncropped photo ({scene.width}×{scene.height}) predicted class")
+                            heading=f"Whole uncropped photo ({scene.width}×{scene.height}) predicted class",
+                            unknown=unknown)
         note = ('<p class="tsr-fine">The whole photo is resized to 224 × 224 like any input, so the sign shrinks '
                 'to a few pixels. Compare with the cropped-sign result above.</p>')
         return gr.HTML(value='<div class="tsr-whole">' + body + note + '</div>', visible=True)
@@ -644,8 +747,61 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
     det_columns = ["#", "Predicted class (ResNet-18)", "Classifier confidence", "Detector confidence",
                    "2nd guess", "3rd guess", "Box x, y, w, h (px)", "Note"]
 
+    cutoff = unknown["threshold"] if unknown else LOW_CONFIDENCE  # below it: amber box (and "Unknown sign")
+
+    def run_pipeline(photo, conf, max_width=1600):
+        """Detector finds boxes -> each box is cropped from the full-resolution photo -> ResNet-18 names it.
+
+        Returns (number of boxes, table rows, crops, annotated copy of the photo, [(label, confidence)])."""
+        dets = detector.detect(photo, conf=conf)
+        scale = min(1.0, max_width / photo.width)
+        shown = photo.resize((round(photo.width * scale), round(photo.height * scale))) if scale < 1 else photo.copy()
+        draw = ImageDraw.Draw(shown)
+        line = max(2, round(shown.width / 400))
+        font = _label_font(max(14, round(shown.width / 75)))
+        rows, crops, found = [], [], []
+        for i, ((x1, y1, x2, y2), dconf) in enumerate(dets, 1):
+            crop = photo.crop((int(x1), int(y1), int(x2), int(y2)))
+            top3 = classifier.top_k(crop, k=3)          # the 26-class prediction always comes from ResNet-18
+            (name, cconf), second, third = top3
+            low = cconf < cutoff
+            shown_name = "Unknown sign" if (low and unknown) else pretty(name)
+            if unknown:
+                note = (f"Below the {cutoff:.0%} cut-off: probably not one of the 26 signs (best guess "
+                        f"{pretty(name)}), an unclear sign, or a false detection" if low else "")
+            else:
+                note = ("Low classifier confidence: possibly an unclear sign, a sign outside the 26 classes, "
+                        "or a false detection" if low else "")
+            rows.append([i, shown_name, _pct(cconf), _pct(dconf), f"{pretty(second[0])} ({_pct(second[1])})",
+                         f"{pretty(third[0])} ({_pct(third[1])})",
+                         f"{int(x1)}, {int(y1)}, {int(x2 - x1)}, {int(y2 - y1)}", note])
+            crops.append((crop, f"#{i} {shown_name} {_pct(cconf)}"))
+            found.append((shown_name, cconf))
+            colour = "#fbbf24" if low else "#38bdf8"
+            bx = [x1 * scale, y1 * scale, x2 * scale, y2 * scale]
+            draw.rectangle(bx, outline=colour, width=line)
+            label = f"#{i} {shown_name}" + ("" if (low and unknown) else f" {100 * cconf:.0f}%")
+            tx, ty = bx[0], max(0, bx[1] - font.size - 2 * line)
+            tb = draw.textbbox((tx, ty), label, font=font)
+            draw.rectangle([tb[0] - 3, tb[1] - 2, tb[2] + 3, tb[3] + 2], fill=colour)
+            draw.text((tx, ty), label, fill="#0b1120", font=font)
+        return len(dets), rows, crops, shown, found
+
+    def detection_summary(n, rows, conf):
+        if not n:
+            return (f'<div class="tsr-alert tsr-alert-warn"><strong>No traffic signs detected</strong> at '
+                    f'detector threshold {conf:.2f}. Try lowering the threshold. The detector was trained on '
+                    'Cambodian road footage, so unusual or non-Cambodian signs may be missed.</div>')
+        n_low = sum(1 for r in rows if r[-1])
+        amber = (f"amber box: below the {cutoff:.0%} cut-off, shown as Unknown sign" if unknown
+                 else f"amber box: lower")
+        return (f'<div class="tsr-result-label">Result</div><div class="tsr-pred" style="font-size:26px">'
+                f'{n} sign{"s" if n != 1 else ""} detected</div>'
+                f'<p class="tsr-help" style="margin-top:6px">Detector threshold {conf:.2f}. Blue box: '
+                f'classifier confidence at least {cutoff:.0%}; {amber} ({n_low} of {n}). Each label is '
+                'ResNet-18\'s best match among its 26 classes and is not checked against any ground truth here.</p>')
+
     def detect_and_classify(photo_path, conf):
-        """Detector finds boxes -> each box is cropped from the full-resolution photo -> ResNet-18 names it."""
         empty_table = pd.DataFrame(columns=det_columns)
         if detector is None:
             return _detection_intro_html(None, None, detector_error), None, empty_table, []
@@ -653,48 +809,69 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
             return ('<div class="tsr-alert tsr-alert-warn">Please upload a street photo (or pick an example) '
                     'first.</div>'), None, empty_table, []
         photo = ImageOps.exif_transpose(Image.open(photo_path)).convert("RGB")  # respect phone rotation
-        dets = detector.detect(photo, conf=conf)
+        n, rows, crops, shown, _ = run_pipeline(photo, conf)
+        return detection_summary(n, rows, conf), shown, pd.DataFrame(rows, columns=det_columns), crops
 
-        scale = min(1.0, 1600 / photo.width)
-        shown = photo.resize((round(photo.width * scale), round(photo.height * scale))) if scale < 1 else photo.copy()
-        draw = ImageDraw.Draw(shown)
-        line = max(2, round(shown.width / 400))
-        font = _label_font(max(14, round(shown.width / 75)))
-        rows, crops = [], []
-        for i, ((x1, y1, x2, y2), dconf) in enumerate(dets, 1):
-            crop = photo.crop((int(x1), int(y1), int(x2), int(y2)))
-            top3 = classifier.top_k(crop, k=3)          # the 26-class prediction always comes from ResNet-18
-            (name, cconf), second, third = top3
-            low = cconf < LOW_CONFIDENCE
-            note = ("Low classifier confidence: possibly an unclear sign, a sign outside the 26 classes, "
-                    "or a false detection" if low else "")
-            rows.append([i, pretty(name), _pct(cconf), _pct(dconf), f"{pretty(second[0])} ({_pct(second[1])})",
-                         f"{pretty(third[0])} ({_pct(third[1])})",
-                         f"{int(x1)}, {int(y1)}, {int(x2 - x1)}, {int(y2 - y1)}", note])
-            crops.append((crop, f"#{i} {pretty(name)} {_pct(cconf)}"))
-            colour = "#fbbf24" if low else "#38bdf8"
-            bx = [x1 * scale, y1 * scale, x2 * scale, y2 * scale]
-            draw.rectangle(bx, outline=colour, width=line)
-            label = f"#{i} {pretty(name)} {100 * cconf:.0f}%"
-            tx, ty = bx[0], max(0, bx[1] - font.size - 2 * line)
-            tb = draw.textbbox((tx, ty), label, font=font)
-            draw.rectangle([tb[0] - 3, tb[1] - 2, tb[2] + 3, tb[3] + 2], fill=colour)
-            draw.text((tx, ty), label, fill="#0b1120", font=font)
-
-        if not dets:
-            summary = (f'<div class="tsr-alert tsr-alert-warn"><strong>No traffic signs detected</strong> at '
-                       f'detector threshold {conf:.2f}. Try lowering the threshold. The detector was trained on '
-                       'Cambodian road footage, so very small, distant, unusual or non-Cambodian signs may be '
-                       'missed. The photo is shown unchanged.</div>')
+    # ----- Live camera: the same pipeline on webcam frames -----
+    def live_frame(frame, conf):
+        if frame is None or detector is None:
+            return None, "", []
+        n, rows, _, shown, found = run_pipeline(frame.convert("RGB"), conf, max_width=960)
+        if not n:
+            text = '<p class="tsr-help">No sign in view. Hold a sign (printed or on a phone screen) closer.</p>'
         else:
-            n_low = sum(1 for r in rows if r[-1])
-            summary = (f'<div class="tsr-result-label">Result</div><div class="tsr-pred" style="font-size:26px">'
-                       f'{len(dets)} sign{"s" if len(dets) != 1 else ""} detected</div>'
-                       f'<p class="tsr-help" style="margin-top:6px">Detector threshold {conf:.2f}. Blue box: '
-                       f'classifier confidence at least {LOW_CONFIDENCE:.0%}; amber box: lower '
-                       f'({n_low} of {len(dets)}). Each label is ResNet-18\'s best match among its 26 classes and '
-                       'is not checked against any ground truth here.</p>')
-        return summary, shown, pd.DataFrame(rows, columns=det_columns), crops
+            text = ('<div class="tsr-result-label">In view now</div><ul class="tsr-legend" style="font-size:15px">'
+                    + "".join(f'<li><strong>{html.escape(lbl)}</strong> {_pct(c)}</li>' for lbl, c in found)
+                    + "</ul>")
+        return shown, text, found
+
+    # ----- Sign map: phone photos with GPS, and live-camera signs at the browser's location -----
+    map_columns = ["Signs", "Source", "Latitude", "Longitude", "Location from"]
+
+    def map_outputs(sightings, message):
+        table = pd.DataFrame([[", ".join(s["signs"]) or "no sign recognised", s["source"], round(s["lat"], 6),
+                               round(s["lon"], 6), s["where"]] for s in sightings], columns=map_columns)
+        return _map_html(sightings), table, sightings, message
+
+    def pin_photos(files, conf, sightings):
+        sightings = list(sightings or [])
+        if detector is None:
+            return map_outputs(sightings, _detection_intro_html(None, None, detector_error))
+        if not files:
+            return map_outputs(sightings, '<div class="tsr-alert tsr-alert-warn">Please upload one or more photos '
+                                          'first.</div>')
+        added, no_gps = 0, []
+        for f in files:
+            path = f if isinstance(f, str) else f.name
+            gps = photo_gps(path)
+            if gps is None:
+                no_gps.append(Path(path).name)
+                continue
+            photo = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+            _, _, _, _, found = run_pipeline(photo, conf)
+            sightings.append({"lat": gps[0], "lon": gps[1], "signs": [f"{lbl} ({100 * c:.0f}%)" for lbl, c in found],
+                              "source": f"photo {Path(path).name}", "where": "photo GPS (EXIF)"})
+            added += 1
+        msg = f'<div class="tsr-alert tsr-alert-ok"><strong>{added} photo{"s" if added != 1 else ""} pinned.</strong>'
+        if no_gps:
+            msg += (f' {len(no_gps)} without GPS location skipped ({html.escape(", ".join(no_gps[:4]))}'
+                    f'{"…" if len(no_gps) > 4 else ""}). Turn on location for the phone camera, and copy the '
+                    'original file: many chat apps remove the location.')
+        return map_outputs(sightings, msg + "</div>")
+
+    def pin_live(lat, lon, found, sightings):
+        sightings = list(sightings or [])
+        if lat is None or lon is None:
+            return map_outputs(sightings, '<div class="tsr-alert tsr-alert-warn"><strong>No location.</strong> '
+                                          'Allow location access in the browser and try again.</div>')
+        if not found:
+            return map_outputs(sightings, '<div class="tsr-alert tsr-alert-warn">No sign in view to pin. Start the '
+                                          'camera and point it at a sign first.</div>')
+        sightings.append({"lat": float(lat), "lon": float(lon), "signs": [f"{lbl} ({100 * c:.0f}%)" for lbl, c in found],
+                          "source": "live camera", "where": "browser location (approximate on a laptop)"})
+        return map_outputs(sightings, f'<div class="tsr-alert tsr-alert-ok"><strong>Pinned {len(found)} '
+                                      f'sign{"s" if len(found) != 1 else ""}</strong> at {float(lat):.5f}, '
+                                      f'{float(lon):.5f}. Open the <strong>Sign Map</strong> tab.</div>')
 
     blocks_kwargs = {"theme": theme, "css": CSS} if gradio_major < 6 else {}
     with gr.Blocks(title="Cambodian Traffic Sign Recognition", **blocks_kwargs) as demo:
@@ -750,7 +927,7 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
                         result_whole = gr.HTML("", visible=False)
 
             with gr.Tab("Detect All Signs in a Street Photo"):
-                gr.HTML(_detection_intro_html(detector, detector_metrics, detector_error))
+                gr.HTML(_detection_intro_html(detector, detector_metrics, detector_error, unknown))
                 with gr.Row(equal_height=False):
                     with gr.Column(scale=5, min_width=260, elem_classes="tsr-panel"):
                         gr.HTML('<div class="tsr-section-title">1. Street photo</div>'
@@ -780,8 +957,54 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
                 det_crops = gr.Gallery(label="Crops sent to the classifier", columns=6, height="auto",
                                        allow_preview=True, object_fit="contain")
 
+            with gr.Tab("Live Camera"):
+                gr.HTML('<p class="tsr-help" style="margin-top:6px">Same detector and classifier as the street-photo '
+                        'tab, on live webcam frames. Point the camera at a sign (a real one, a printed one, or a '
+                        'photo on a phone screen). A laptop webcam is blurrier than the dashcam the models were '
+                        'trained on, so results can be weaker than the test numbers.</p>')
+                with gr.Row(equal_height=False):
+                    with gr.Column(scale=5, min_width=260, elem_classes="tsr-panel"):
+                        gr.HTML('<div class="tsr-section-title">1. Camera</div>'
+                                '<p class="tsr-help">Allow camera access, then press the record button.</p>')
+                        cam = gr.Image(sources=["webcam"], streaming=True, type="pil", label="Webcam", height=320,
+                                       interactive=detector is not None)
+                        live_conf = gr.Slider(0.05, 0.9, value=0.25, step=0.05,
+                                              label="Detector confidence threshold (0.25 was used in the evaluation)")
+                    with gr.Column(scale=5, min_width=260, elem_classes="tsr-panel"):
+                        gr.HTML('<div class="tsr-section-title">2. Live result</div>')
+                        live_out = gr.Image(label="Detections", interactive=False, height=320)
+                        live_text = gr.HTML("")
+                        pin_btn = gr.Button("Pin the signs in view on the map (uses this browser's location)",
+                                            variant="secondary", interactive=detector is not None)
+                        live_pin_msg = gr.HTML("")
+
+            with gr.Tab("Sign Map"):
+                gr.HTML('<p class="tsr-help" style="margin-top:6px">Each pin is a photo or live-camera view and the '
+                        'signs recognised in it. Phone photos: their GPS location (EXIF) is used. Live camera: the '
+                        "browser's location, which on a laptop is only approximate (Wi-Fi based). Map data &copy; "
+                        'OpenStreetMap contributors; needs an internet connection.</p>')
+                with gr.Row(equal_height=False):
+                    with gr.Column(scale=4, min_width=260, elem_classes="tsr-panel"):
+                        gr.HTML('<div class="tsr-section-title">1. Phone photos with location</div>'
+                                '<p class="tsr-help">Upload original photo files (location turned on in the camera). '
+                                'Each photo goes through the detector and classifier and is pinned at its GPS '
+                                'position.</p>')
+                        map_files = gr.File(file_count="multiple", file_types=["image"], label="Photos")
+                        map_conf = gr.Slider(0.05, 0.9, value=0.25, step=0.05,
+                                             label="Detector confidence threshold (0.25 was used in the evaluation)")
+                        with gr.Row():
+                            map_btn = gr.Button("Detect, classify & pin", variant="primary", scale=3, min_width=120,
+                                                elem_classes="tsr-classify", interactive=detector is not None)
+                            map_clear = gr.Button("Clear map", variant="secondary", scale=1, min_width=80)
+                        map_msg = gr.HTML("")
+                    with gr.Column(scale=6, min_width=260, elem_classes="tsr-panel"):
+                        gr.HTML('<div class="tsr-section-title">2. Map</div>')
+                        map_view = gr.HTML(_map_html([]))
+                map_table = gr.Dataframe(value=pd.DataFrame(columns=map_columns), label="Pinned signs",
+                                         interactive=False, wrap=True)
+
         with gr.Accordion("Model Details & Limitations", open=False):
-            gr.HTML(_details_html(classifier, verification, metrics))
+            gr.HTML(_details_html(classifier, verification, metrics, unknown))
         gr.HTML('<div class="tsr-footer">Cambodian Traffic Sign Recognition &middot; Tes Sothyroth &middot; '
                 'Kirirom Institute of Technology &middot; Built with PyTorch and Gradio</div>')
 
@@ -803,6 +1026,19 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
         detect_btn.click(detect_and_classify, inputs=[photo_in, det_conf], outputs=det_outputs)
         det_clear_btn.click(lambda: (None, EMPTY_DETECTION, None, pd.DataFrame(columns=det_columns), []),
                             outputs=[photo_in, *det_outputs])
+
+        live_found = gr.State([])       # signs in the latest webcam frame
+        sightings = gr.State([])        # pins on the map (this browser session only)
+        lat_box = gr.Number(visible=False)
+        lon_box = gr.Number(visible=False)
+        if detector is not None:
+            cam.stream(live_frame, inputs=[cam, live_conf], outputs=[live_out, live_text, live_found],
+                       stream_every=0.4, concurrency_limit=1, show_progress="hidden")
+        map_out = [map_view, map_table, sightings]
+        pin_btn.click(None, js=GEOLOCATION_JS, outputs=[lat_box, lon_box]).then(
+            pin_live, inputs=[lat_box, lon_box, live_found, sightings], outputs=[*map_out, live_pin_msg])
+        map_btn.click(pin_photos, inputs=[map_files, map_conf, sightings], outputs=[*map_out, map_msg])
+        map_clear.click(lambda: map_outputs([], ""), outputs=[*map_out, map_msg])
 
     if gradio_major >= 6:
         # Gradio 6 takes theme and css in launch(); apply them by default for every caller (also notebook 08).
@@ -829,6 +1065,8 @@ def main():
                         help="detector_and_pipeline_metrics.json from scripts/train_sign_detector.py")
     parser.add_argument("--raw-dir", default=os.environ.get("RAW_DIR", str(PROJECT_ROOT / "dataset" / "raw" / "images")),
                         help="original street photos (test-split examples for the detection tab)")
+    parser.add_argument("--no-unknown", action="store_true",
+                        help='do not show low-confidence predictions as "Unknown sign" (results/unknown_sign/)')
     args = parser.parse_args()
 
     classifier = SignClassifier(args.checkpoint)
@@ -847,7 +1085,8 @@ def main():
     demo = build_demo(classifier, verification, load_reported_metrics(), example_images(args.processed_dir),
                       detector=detector, detector_metrics=load_detector_metrics(args.detector_metrics),
                       det_examples=detection_examples(args.raw_dir) if detector else [],
-                      detector_error=detector_error)
+                      detector_error=detector_error,
+                      unknown=None if args.no_unknown else load_unknown_rule())
     demo.launch(server_name="127.0.0.1", server_port=args.port, share=args.share)
 
 

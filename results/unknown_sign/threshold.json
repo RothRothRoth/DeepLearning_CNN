@@ -1,0 +1,23 @@
+{
+  "threshold": 0.9,
+  "rule": "max balanced accuracy on selection set; ties -> lowest threshold",
+  "selection_set": "validation 26-class signs + train and validation non-26-class signs",
+  "selection_rates": {
+    "known_signs": 454,
+    "unknown_signs": 125,
+    "known_kept": 0.9955947136563876,
+    "known_kept_and_correct": 0.9933920704845814,
+    "known_correct_without_cutoff": 0.9977973568281938,
+    "unknown_flagged": 0.84,
+    "balanced_accuracy": 0.9177973568281939
+  },
+  "rates_without_cutoff_on_selection": {
+    "known_signs": 454,
+    "unknown_signs": 125,
+    "known_kept": 1.0,
+    "known_kept_and_correct": 0.9977973568281938,
+    "known_correct_without_cutoff": 0.9977973568281938,
+    "unknown_flagged": 0.0,
+    "balanced_accuracy": 0.5
+  }
+}

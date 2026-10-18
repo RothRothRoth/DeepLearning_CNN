@@ -1,0 +1,30 @@
+{
+  "threshold": 0.9,
+  "test": {
+    "known_signs": 463,
+    "unknown_signs": 30,
+    "known_kept": 0.9719222462203023,
+    "known_kept_and_correct": 0.9654427645788337,
+    "known_correct_without_cutoff": 0.9892008639308856,
+    "unknown_flagged": 0.9,
+    "balanced_accuracy": 0.9359611231101512
+  },
+  "test_excluding_UNDEFINED_unknowns": {
+    "known_signs": 463,
+    "unknown_signs": 22,
+    "known_kept": 0.9719222462203023,
+    "known_kept_and_correct": 0.9654427645788337,
+    "known_correct_without_cutoff": 0.9892008639308856,
+    "unknown_flagged": 0.9090909090909091,
+    "balanced_accuracy": 0.9405065776556056
+  },
+  "test_without_cutoff": {
+    "known_signs": 463,
+    "unknown_signs": 30,
+    "known_kept": 1.0,
+    "known_kept_and_correct": 0.9892008639308856,
+    "known_correct_without_cutoff": 0.9892008639308856,
+    "unknown_flagged": 0.0,
+    "balanced_accuracy": 0.5
+  }
+}
