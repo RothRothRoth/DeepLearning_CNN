@@ -331,7 +331,26 @@ Training started from the first detector's weights: 30 epochs at 1280 px, seed 4
 
 On the normal test photos the retrained detector has precision 93.83%, recall 96.55%, mAP@50 0.985 and mAP@50-95 0.875 (first detector: 95.57%, 96.34%, 0.978, 0.873), so the two are about equal there.
 
-- **Limitations:** the close-up test images are **simulated** from test photos (zoomed crops and pasted crops), not real phone photos. Single run (seed 42). Signs outside the 26 classes still get the closest of the 26 labels. The threshold check of Section 10 was done for the first detector only.
+- **Limitations:** the close-up test images are **simulated** from test photos (zoomed crops and pasted crops), not real phone photos. Single run (seed 42). Signs outside the 26 classes still get the closest of the 26 labels (see Section 10.2). The threshold check of Section 10 was done for the first detector only.
+
+### 10.2 Web app: "Unknown sign", Live Camera and Sign Map
+
+**"Unknown sign" cut-off (no retraining).** The classifier always picks one of its 26 classes, so a STOP sign gets the closest label. The web app therefore shows **"Unknown sign"** when the classifier's top-1 confidence is below a cut-off. The dataset annotates other sign types too (STOP, ROAD WORK AHEAD, PARKING, NO STOPPING, HEIGHT LIMIT, ROUND ABOUT, ... and UNDEFINED), which the classifier never saw, so the cut-off can be chosen and tested on real signs:
+
+- **Choice (fixed rule, no test data):** validation signs of the 26 classes (454) plus the other signs in the training and validation photos (125). Cut-offs 0.30 to 0.99 were compared, and the highest balanced accuracy (known signs kept + other signs flagged, averaged) chose **0.90**.
+- **Test, evaluated once** (crops cut from the test photos with the annotation boxes; [`test_once.json`](results/unknown_sign/test_once.json)):
+
+| Test signs | Without the cut-off | With the 0.90 cut-off |
+|---|---:|---:|
+| Signs outside the 26 classes flagged as "Unknown sign" (30) | 0 | **27 (90.0%)** |
+| 26-class signs still named correctly (463) | 458 (98.92%) | 447 (96.54%) |
+| 26-class signs wrongly flagged as unknown | 0 | 13 (2.81%) |
+
+The 3 misses are two NO STOPPING signs read as No Parking (98% and 100%), which look almost identical, and one UNDEFINED sign ([examples](results/unknown_sign/test_unknown_examples.jpg)). The 98.92% differs from the official 98.70% because these crops are cut from the original photos rather than read from the saved crop files. This is a confidence rule, not a trained "other" class, and the 30 test signs are few. Code: [`scripts/unknown_sign_threshold.py`](scripts/unknown_sign_threshold.py); start the app with `--no-unknown` to turn it off.
+
+**Live Camera tab.** The same detect-then-classify pipeline on webcam frames (a new frame is processed about every 0.4 s). The webcam image is **not mirrored**: a mirrored Left Bend would be a Right Bend. A laptop webcam is blurrier than the dashcam the models were trained on; no accuracy was measured for webcam input.
+
+**Sign Map tab.** Phone photos (original files, camera location turned on) go through the same pipeline and are pinned on an OpenStreetMap map at their EXIF GPS position; live-camera signs can be pinned at the browser's location, which on a laptop is only approximate. The map needs an internet connection, and the pins are kept only for the current browser session.
 
 ## 11. Limitations
 
@@ -479,7 +498,13 @@ python scripts/train_sign_detector.py --batch 6
 python scripts/train_sign_detector_closeup.py --batch 4
 ```
 
-- Local web app (Gradio), serving http://127.0.0.1:7860 only. Needs the extra package `gradio` (version 6.30.0 was used). The `--detector` options are only needed for the street-photo tab. With the retrained detector:
+- "Unknown sign" cut-off (Section 10.2), inference only; writes `results/unknown_sign/`, which the web app reads:
+
+```bash
+python scripts/unknown_sign_threshold.py --checkpoint path/to/resnet18_finetuned_tuned_best.pt
+```
+
+- Local web app (Gradio), serving http://127.0.0.1:7860 only. Needs the extra package `gradio` (version 6.30.0 was used). The `--detector` options are only needed for the street-photo, Live Camera and Sign Map tabs. With the retrained detector:
 
 ```bash
 python app.py --checkpoint path/to/resnet18_finetuned_tuned_best.pt --detector path/to/sign_detector_closeup_best.pt --detector-metrics results/sign_detector_closeup/detector_and_pipeline_metrics.json
@@ -493,7 +518,7 @@ With the first detector, use `--detector path/to/sign_detector_best.pt --detecto
 DeepLearning_CNN/
 ├── README.md
 ├── requirements.txt                     # Python package versions (see Section 12)
-├── app.py                               # local Gradio web app (classification + street-photo detection)
+├── app.py                               # local Gradio web app: crop classification, street-photo detection, live camera, sign map
 ├── Road_Sign_Recognition_CNN.ipynb      # original project notebook (overview, dataset exploration)
 ├── dataset/
 │   ├── splits/                          # committed leak-free split manifests
@@ -523,7 +548,8 @@ DeepLearning_CNN/
 │   ├── final_model/                     # final model error analysis (misclassified images)
 │   ├── grouped_evaluation/              # Section 9: 15 runs, summary tables, figures, leakage check
 │   ├── sign_detector/                   # Section 10: detector and pipeline metrics, curves, threshold check
-│   └── sign_detector_closeup/           # Section 10.1: retrained close-up detector, first vs. retrained
+│   ├── sign_detector_closeup/           # Section 10.1: retrained close-up detector, first vs. retrained
+│   └── unknown_sign/                    # Section 10.2: "Unknown sign" cut-off, choice and one-time test
 └── docs/  slides/
 ```
 

@@ -57,9 +57,15 @@ DRIVE_CHECKPOINT_RELATIVE = ("results/runs/hyperparameter_tuning/resnet18_finetu
 LOW_CONFIDENCE = 0.5
 
 
+# Display names for class codes whose title-cased form is misspelt or unclear (the codes keep the dataset spelling).
+DISPLAY_NAMES = {"PEDESTRAIN_CROSSING": "Pedestrian Crossing", "PEDESTRAIN_CR_AREA": "Pedestrian Crossing Area",
+                 "NO_UTURN": "No U-Turn", "U_TURN": "U-Turn", "KM_POST": "KM Post",
+                 "STAGGERED_JUNCTION_RL": "Staggered Junction R-L"}
+
+
 def pretty(class_name: str) -> str:
     """Readable class name, e.g. 'ROAD_JUNCTION_ON_THE_LEFT' -> 'Road Junction On The Left'."""
-    return class_name.replace("_", " ").title()
+    return DISPLAY_NAMES.get(class_name, class_name.replace("_", " ").title())
 
 
 class SignClassifier:
@@ -966,10 +972,12 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
                     with gr.Column(scale=5, min_width=260, elem_classes="tsr-panel"):
                         gr.HTML('<div class="tsr-section-title">1. Camera</div>'
                                 '<p class="tsr-help">Allow camera access, then press the record button.</p>')
+                        # No mirroring: a mirrored Left Bend is a Right Bend, Keep Right becomes Keep Left, etc.
                         cam = gr.Image(sources=["webcam"], streaming=True, type="pil", label="Webcam", height=320,
-                                       interactive=detector is not None)
+                                       interactive=detector is not None,
+                                       webcam_options=gr.WebcamOptions(mirror=False))
                         live_conf = gr.Slider(0.05, 0.9, value=0.25, step=0.05,
-                                              label="Detector confidence threshold (0.25 was used in the evaluation)")
+                                              label="Detector threshold (0.25 used in the evaluation)")
                     with gr.Column(scale=5, min_width=260, elem_classes="tsr-panel"):
                         gr.HTML('<div class="tsr-section-title">2. Live result</div>')
                         live_out = gr.Image(label="Detections", interactive=False, height=320)
@@ -984,20 +992,20 @@ def build_demo(classifier, verification, metrics=None, examples=None, detector=N
                         "browser's location, which on a laptop is only approximate (Wi-Fi based). Map data &copy; "
                         'OpenStreetMap contributors; needs an internet connection.</p>')
                 with gr.Row(equal_height=False):
-                    with gr.Column(scale=4, min_width=260, elem_classes="tsr-panel"):
+                    with gr.Column(scale=5, min_width=300, elem_classes="tsr-panel"):
                         gr.HTML('<div class="tsr-section-title">1. Phone photos with location</div>'
                                 '<p class="tsr-help">Upload original photo files (location turned on in the camera). '
                                 'Each photo goes through the detector and classifier and is pinned at its GPS '
                                 'position.</p>')
                         map_files = gr.File(file_count="multiple", file_types=["image"], label="Photos")
                         map_conf = gr.Slider(0.05, 0.9, value=0.25, step=0.05,
-                                             label="Detector confidence threshold (0.25 was used in the evaluation)")
+                                             label="Detector threshold (0.25 used in the evaluation)")
                         with gr.Row():
-                            map_btn = gr.Button("Detect, classify & pin", variant="primary", scale=3, min_width=120,
+                            map_btn = gr.Button("Detect & pin", variant="primary", scale=3, min_width=120,
                                                 elem_classes="tsr-classify", interactive=detector is not None)
                             map_clear = gr.Button("Clear map", variant="secondary", scale=1, min_width=80)
                         map_msg = gr.HTML("")
-                    with gr.Column(scale=6, min_width=260, elem_classes="tsr-panel"):
+                    with gr.Column(scale=5, min_width=300, elem_classes="tsr-panel"):
                         gr.HTML('<div class="tsr-section-title">2. Map</div>')
                         map_view = gr.HTML(_map_html([]))
                 map_table = gr.Dataframe(value=pd.DataFrame(columns=map_columns), label="Pinned signs",
